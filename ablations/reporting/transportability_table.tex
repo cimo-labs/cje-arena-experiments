@@ -1,0 +1,16 @@
+% Transportability test results with statistical tests
+\begin{table}[htbp]
+\centering
+\caption{Transportability Test Results: Base Policy Calibrator → Target Policies}
+\label{tab:transportability}
+\begin{tabular}{lcccc}
+\toprule
+Policy & Status & $\hat{\delta}$ & 95\% CI & Coverage \\
+\midrule
+clone & \checkmark & $-0.004$ & $[-0.009, +0.002]$ & 100.0% \\
+parallel universe prompt & \checkmark & $-0.001$ & $[-0.006, +0.005]$ & 100.0% \\
+premium & \checkmark & $-0.005$ & $[-0.011, +0.000]$ & 100.0% \\
+unhelpful & \times & $-0.312$ & $[-0.317, -0.307]$ & 100.0% \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,7 @@
+Summary Statistics:
+--------------------------------------------------
+Best RMSE^d: direct (0.0352)
+Best Coverage: naive-direct (190.0%)
+Gate Pass Rate (low coverage): 100.0%
+Gate Pass Rate (high coverage): 100.0%
+MC Variance Contribution: 34.3% (mean), 97.7% (max)

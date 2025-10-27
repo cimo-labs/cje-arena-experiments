@@ -1,0 +1,32 @@
+# Large data and result files
+data/
+ablations/results/
+ablations/tables/
+ablations/.cache/
+outputs/
+*.jsonl
+*.csv
+*.pkl
+*.parquet
+*.h5
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.venv
+env/
+venv/

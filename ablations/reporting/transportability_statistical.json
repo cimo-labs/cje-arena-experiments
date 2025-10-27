@@ -1,0 +1,118 @@
+{
+  "config": {
+    "subsample_size": null,
+    "oracle_coverage": 0.25,
+    "probe_size": null,
+    "seed": 42
+  },
+  "calibrator": {
+    "mode": "two_stage",
+    "rmse": 0.19477216047019943
+  },
+  "results": {
+    "clone": {
+      "status": "PASS",
+      "delta_hat": -0.00383288540551488,
+      "delta_ci": [
+        -0.009335162754057783,
+        0.0016693919430280217
+      ],
+      "delta_se": 0.0028072843615014804,
+      "decile_residuals": [
+        0.0025791968311653594,
+        0.008060392338547967,
+        -0.006188360179852426,
+        -0.003006820094888586
+      ],
+      "decile_counts": [
+        254,
+        405,
+        3153,
+        1188
+      ],
+      "coverage": 1.0,
+      "recommended_action": "none",
+      "n_probe": 5000,
+      "group_label": "policy:clone"
+    },
+    "parallel_universe_prompt": {
+      "status": "PASS",
+      "delta_hat": -0.0006519518160556486,
+      "delta_ci": [
+        -0.006000530414188692,
+        0.004696626782077394
+      ],
+      "delta_se": 0.002728866631700532,
+      "decile_residuals": [
+        0.011222815560164984,
+        -0.0030545471273886525,
+        -0.0038591766747127633,
+        0.0044354174025670965,
+        0.0031370523415974886
+      ],
+      "decile_counts": [
+        249,
+        325,
+        2791,
+        447,
+        1188
+      ],
+      "coverage": 1.0,
+      "recommended_action": "none",
+      "n_probe": 5000,
+      "group_label": "policy:parallel_universe_prompt"
+    },
+    "premium": {
+      "status": "PASS",
+      "delta_hat": -0.005474215659399902,
+      "delta_ci": [
+        -0.010951892105234375,
+        3.4607864345696446e-06
+      ],
+      "delta_se": 0.0027947328805277916,
+      "decile_residuals": [
+        -0.014443738080101694,
+        0.005741739369249291,
+        -0.007702724245131491,
+        -0.0009321454069493787
+      ],
+      "decile_counts": [
+        242,
+        373,
+        3239,
+        1146
+      ],
+      "coverage": 1.0,
+      "recommended_action": "none",
+      "n_probe": 5000,
+      "group_label": "policy:premium"
+    },
+    "unhelpful": {
+      "status": "FAIL",
+      "delta_hat": -0.31209209668395804,
+      "delta_ci": [
+        -0.317227459023007,
+        -0.3069567343449091
+      ],
+      "delta_se": 0.002620082826045366,
+      "decile_residuals": [
+        -0.5307482135350988,
+        -0.3812904433374231,
+        -0.19599072039072038,
+        -0.20343008547008545,
+        -0.10500052435757774
+      ],
+      "decile_counts": [
+        61,
+        3278,
+        600,
+        500,
+        561
+      ],
+      "coverage": 1.0,
+      "recommended_action": "refit_two_stage",
+      "n_probe": 5000,
+      "group_label": "policy:unhelpful"
+    }
+  }
+}
