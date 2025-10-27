@@ -1,0 +1,15 @@
+# CJE Arena Experiments Requirements
+# Install with: pip install -r requirements.txt
+
+# Core CJE library
+cje-eval[all]>=0.2.3
+
+# Additional dependencies for experiments
+tqdm>=4.65.0          # Progress bars for long-running experiments
+scikit-learn>=1.4.0   # Already in cje-eval, but explicit for experiments
+
+# Optional: For data generation (requires API keys)
+# Uncomment if you need to regenerate data from scratch
+# langchain>=0.1.0
+# openai>=1.0.0
+# anthropic>=0.18.0

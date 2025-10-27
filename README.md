@@ -12,6 +12,31 @@ This repository contains the experimental pipeline used to benchmark the **[CJE 
 
 Ablation study of CJE estimators on simulated competition data, demonstrating 13.9× ESS improvement with SIMCal.
 
+## Setup
+
+**Prerequisites:** Python 3.9-3.12
+
+```bash
+# 1. Clone this repository
+git clone https://github.com/cimo-labs/cje-arena-experiments.git
+cd cje-arena-experiments
+
+# 2. Install dependencies (includes CJE library)
+pip install -r requirements.txt
+
+# 3. Verify installation
+python verify_setup.py
+```
+
+**What's included:**
+- ✅ Main dataset (`data/cje_dataset.jsonl` - 10MB)
+- ✅ Fresh draws for DR (`data/responses/` - 44MB)
+- ✅ All Python code and documentation
+- ❌ Log probabilities (`data/logprobs/` - 223MB, gitignored)
+- ❌ Experiment results (`ablations/results/` - 11GB, gitignored)
+
+**Note:** The experiments will run on the included dataset. If you need the log probabilities for IPS experiments, see [Data Generation Pipeline](#data-generation-pipeline) below.
+
 ## Quick Start
 
 ```bash

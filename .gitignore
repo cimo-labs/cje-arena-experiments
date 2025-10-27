@@ -1,14 +1,23 @@
-# Large data and result files
-data/
+# Experiment results (11GB) - regenerate by running experiments
 ablations/results/
 ablations/tables/
 ablations/.cache/
 outputs/
-*.jsonl
-*.csv
+
+# Large data files - download separately if needed
+data/logprobs/
+data/plots/
+data/test_aggregated.jsonl
+
+# Generated outputs
 *.pkl
 *.parquet
 *.h5
+
+# Keep these data files (needed to run experiments):
+# - data/cje_dataset.jsonl (~10MB)
+# - data/prompts.jsonl (~1MB)
+# - data/responses/ (~44MB)
 
 # Python
 __pycache__/
