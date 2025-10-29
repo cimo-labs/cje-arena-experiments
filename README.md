@@ -21,21 +21,14 @@ Ablation study of CJE estimators on simulated competition data, demonstrating 13
 git clone https://github.com/cimo-labs/cje-arena-experiments.git
 cd cje-arena-experiments
 
-# 2. Install dependencies (includes CJE library)
+# 2. Install dependencies (includes cje-eval library)
 pip install -r requirements.txt
 
-# 3. Verify installation
+# 3. Verify setup
 python verify_setup.py
 ```
 
-**What's included:**
-- ✅ Main dataset (`data/cje_dataset.jsonl` - 10MB)
-- ✅ Fresh draws for DR (`data/responses/` - 44MB)
-- ✅ All Python code and documentation
-- ❌ Log probabilities (`data/logprobs/` - 223MB, gitignored)
-- ❌ Experiment results (`ablations/results/` - 11GB, gitignored)
-
-**Note:** The experiments will run on the included dataset. If you need the log probabilities for IPS experiments, see [Data Generation Pipeline](#data-generation-pipeline) below.
+The dataset (~288MB) is included in the repository. Ablation results (~11GB) are excluded—you'll regenerate them by running the experiments.
 
 ## Quick Start
 
@@ -175,20 +168,29 @@ unhelpful                 0.443        0.143        +0.300     ✗
 
 Note: The `unhelpful` policy typically scores very low (< 0.2) by design and is challenging to estimate accurately due to extreme distribution shift
 
-## Requirements
+## What's Included
+
+- **Dataset:** 288MB of Arena data with judge scores, oracle labels, and logprobs (in `data/`)
+- **Code:** Full ablation pipeline, analysis scripts, and visualization tools
+- **Documentation:** Comprehensive READMEs explaining the experimental design
+
+**Not included (you regenerate these):**
+- Ablation results (~11GB) - Run `ablations/run.py` to generate
+- Additional fresh draws - Use scripts in `data_generation/` if needed
+
+## Advanced: Data Generation
+
+If you want to regenerate the dataset from scratch (requires API keys):
 
 ```bash
-# Install CJE library from PyPI
-pip install cje-eval[all]
-
-# Or install from source
-git clone https://github.com/cimo-labs/cje.git
-cd cje
-pip install -e .[all]
-
-# For data generation (optional)
+# Set up API access
 export OPENAI_API_KEY=your_key
 export ANTHROPIC_API_KEY=your_key
+
+# See data_generation/README.md for full pipeline
+cd data_generation/
+python prepare_arena_data.py
+# ... (see full pipeline in README)
 ```
 
 ## Output

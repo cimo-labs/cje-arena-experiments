@@ -1,0 +1,645 @@
+{
+  "metadata": {
+    "timestamp": "2025-09-02T12:51:16.624403",
+    "n_samples": 4989,
+    "n_valid_samples": 4961,
+    "policies_analyzed": [
+      "clone",
+      "parallel_universe_prompt",
+      "premium",
+      "unhelpful"
+    ],
+    "n_extreme_analyzed": 5
+  },
+  "per_policy_analysis": {
+    "clone": {
+      "statistics": {
+        "raw_weight_range": [
+          0.009820255191883943,
+          79.60364712866867
+        ],
+        "calibrated_weight_range": [
+          0.9339933032142674,
+          1.00480954031479
+        ],
+        "n_clipped_high": 0,
+        "n_near_zero": 0,
+        "ess_raw": "21.6%",
+        "ess_calibrated": "100.0%"
+      },
+      "extreme_samples": {
+        "highest_weights": [
+          {
+            "rank": 1,
+            "sample_id": "arena_5285",
+            "prompt": "Please write a hilarious, surprising caption for the following New Yorker cartoon. The cartoon featu...",
+            "response_preview": "\"I told you we should have invested in a white picket fence, not a liability waiver.\"",
+            "base_logprob": -6.507575040000006,
+            "target_logprob": 0.0,
+            "log_ratio": 6.507575040000006,
+            "raw_weight": 79.60364712866867,
+            "calibrated_weight": 1.00480954031479,
+            "reward": 0.6743990250139846,
+            "explanation": "Target policy more likely (\u0394=6.5 nats)"
+          },
+          {
+            "rank": 2,
+            "sample_id": "arena_326",
+            "prompt": "Make a list of the possible applications of foundation models for a geospatial company that has acce...",
+            "response_preview": "Here are some possible applications of foundation models for a geospatial company with access to aer...",
+            "base_logprob": -102.37130457999973,
+            "target_logprob": 0.0,
+            "log_ratio": 102.37130457999973,
+            "raw_weight": 62.3224858970038,
+            "calibrated_weight": 1.00480954031479,
+            "reward": 0.7518213058419231,
+            "explanation": "Target policy MUCH more likely (\u0394=102.4 nats)"
+          },
+          {
+            "rank": 3,
+            "sample_id": "arena_5333",
+            "prompt": "What's the most popular manga series from the kirara max (and related) magazines from houbunsha rece...",
+            "response_preview": "The Kirara MAX (and related) magazines from Houbunsha are known for publishing popular manga series,...",
+            "base_logprob": -64.0331726300002,
+            "target_logprob": 0.0,
+            "log_ratio": 64.0331726300002,
+            "raw_weight": 54.96228100197381,
+            "calibrated_weight": 1.00480954031479,
+            "reward": 0.5969767441860463,
+            "explanation": "Target policy MUCH more likely (\u0394=64.0 nats)"
+          },
+          {
+            "rank": 4,
+            "sample_id": "arena_1340",
+            "prompt": "I am comparing you to another language model right now, with this exact same prompt. Say something t...",
+            "response_preview": "The iterative process of comparison sparks introspection. As I generate this response, I'm aware of ...",
+            "base_logprob": -38.94401456000003,
+            "target_logprob": 0.0,
+            "log_ratio": 38.94401456000003,
+            "raw_weight": 51.25178106999421,
+            "calibrated_weight": 1.00480954031479,
+            "reward": 0.7518213058419231,
+            "explanation": "Target policy MUCH more likely (\u0394=38.9 nats)"
+          },
+          {
+            "rank": 5,
+            "sample_id": "arena_1244",
+            "prompt": "Identify the 20% of SI delivery that will yield 80% of the desired results and provide a focused lea...",
+            "response_preview": "To identify the 20% of Service Integration (SI) delivery that will yield 80% of the desired results,...",
+            "base_logprob": -104.67995734000027,
+            "target_logprob": 0.0,
+            "log_ratio": 104.67995734000027,
+            "raw_weight": 36.9903722749891,
+            "calibrated_weight": 1.00480954031479,
+            "reward": 0.5969767441860463,
+            "explanation": "Target policy MUCH more likely (\u0394=104.7 nats)"
+          }
+        ],
+        "lowest_weights": [
+          {
+            "rank": 1,
+            "sample_id": "arena_870",
+            "prompt": "Known for more philosophical works, he wrote the play 'La Mandragola', in which Florentines are rewa...",
+            "response_preview": "The author you are referring to is Niccol\u00f2 Machiavelli. 'La Mandragola' is a comedy play written by ...",
+            "base_logprob": -15.559172610000132,
+            "target_logprob": 0.0,
+            "log_ratio": 15.559172610000132,
+            "raw_weight": 0.009820255191883943,
+            "calibrated_weight": 1.00480954031479,
+            "reward": 0.7518213058419231,
+            "explanation": "Target policy more likely (\u0394=15.6 nats)"
+          },
+          {
+            "rank": 2,
+            "sample_id": "arena_2193",
+            "prompt": "Describe the following ages of a dark fantasy setting: 1. Initial Age, 2. Formless Age, 3. Tyrannic ...",
+            "response_preview": "What a fascinating dark fantasy setting! Here's a description of each age:\n\n**1. Initial Age (Dawn o...",
+            "base_logprob": -158.05541146999985,
+            "target_logprob": 0.0,
+            "log_ratio": 158.05541146999985,
+            "raw_weight": 0.011475174915166869,
+            "calibrated_weight": 1.00480954031479,
+            "reward": 0.5969767441860463,
+            "explanation": "Target policy MUCH more likely (\u0394=158.1 nats)"
+          },
+          {
+            "rank": 3,
+            "sample_id": "arena_5908",
+            "prompt": "Basket A has 2 apples. Basket B has 1 apple and 1 banana. Basket C has 3 pineapples and 1 orange. Ba...",
+            "response_preview": "Let's move the apples:\n\nInitially:\n- Basket A: 2 apples\n- Basket B: 1 apple, 1 banana\n- Basket C: 3 ...",
+            "base_logprob": -4.854848909999873,
+            "target_logprob": 0.0,
+            "log_ratio": 4.854848909999873,
+            "raw_weight": 0.01988447246435904,
+            "calibrated_weight": 1.00480954031479,
+            "reward": 0.9623255813953489,
+            "explanation": "Similar likelihood (\u0394=4.9 nats)"
+          },
+          {
+            "rank": 4,
+            "sample_id": "arena_5708",
+            "prompt": "Rank Luffy from One Piece from 1 to 10 according to the following template and explain your reasonin...",
+            "response_preview": "Based on the One Piece series, here's my ranking of Luffy according to the given template:\n\n**Streng...",
+            "base_logprob": -83.76029400999988,
+            "target_logprob": 0.0,
+            "log_ratio": 83.76029400999988,
+            "raw_weight": 0.028143272514778415,
+            "calibrated_weight": 1.00480954031479,
+            "reward": 0.7518213058419231,
+            "explanation": "Target policy MUCH more likely (\u0394=83.8 nats)"
+          },
+          {
+            "rank": 5,
+            "sample_id": "arena_495",
+            "prompt": "Who is the CEO of Twitter?",
+            "response_preview": "As of my knowledge cutoff in 2023, Elon Musk is the owner of Twitter. However, he appointed Linda Ya...",
+            "base_logprob": -3.2045135600000947,
+            "target_logprob": 0.0,
+            "log_ratio": 3.2045135600000947,
+            "raw_weight": 0.032739991390666086,
+            "calibrated_weight": 1.00480954031479,
+            "reward": 0.7518213058419231,
+            "explanation": "Similar likelihood (\u0394=3.2 nats)"
+          }
+        ]
+      }
+    },
+    "parallel_universe_prompt": {
+      "statistics": {
+        "raw_weight_range": [
+          8.257001587744642e-46,
+          1242804.055882973
+        ],
+        "calibrated_weight_range": [
+          0.04715241854533312,
+          1.0739834771616983
+        ],
+        "n_clipped_high": 95,
+        "n_near_zero": 859,
+        "ess_raw": "0.0%",
+        "ess_calibrated": "97.4%"
+      },
+      "extreme_samples": {
+        "highest_weights": [
+          {
+            "rank": 1,
+            "sample_id": "arena_1688",
+            "prompt": "Pick all that apply in relation to the following:\n\nIt's possible that the earth's continents were on...",
+            "response_preview": "To evaluate the argument, let's break it down into its components and create a truth table. The argu...",
+            "base_logprob": -80.39975452999988,
+            "target_logprob": 0.0,
+            "log_ratio": 80.39975452999988,
+            "raw_weight": 1242804.055882973,
+            "calibrated_weight": 1.0739834771616983,
+            "reward": 0.3578947368421053,
+            "explanation": "Target policy MUCH more likely (\u0394=80.4 nats)"
+          },
+          {
+            "rank": 2,
+            "sample_id": "arena_906",
+            "prompt": "write 5 words that start with \u201cEN\u201d then write the output of \u201c77+33",
+            "response_preview": "Here are 5 words that start with \"EN\":\n1. Energy\n2. Endless\n3. Enemy\n4. Envelope\n5. Engine\n\nThe outp...",
+            "base_logprob": -14.02700808000003,
+            "target_logprob": 0.0,
+            "log_ratio": 14.02700808000003,
+            "raw_weight": 33617.401040374156,
+            "calibrated_weight": 1.0277896771297643,
+            "reward": 0.9623255813953489,
+            "explanation": "Target policy more likely (\u0394=14.0 nats)"
+          },
+          {
+            "rank": 3,
+            "sample_id": "arena_4438",
+            "prompt": "Write hello world python app using fastapi",
+            "response_preview": "To create a simple \"Hello, World!\" application using FastAPI, you will first need to ensure you have...",
+            "base_logprob": -76.88227552000009,
+            "target_logprob": 0.0,
+            "log_ratio": 76.88227552000009,
+            "raw_weight": 32831.89038954567,
+            "calibrated_weight": 1.0277896771297643,
+            "reward": 0.9018055555555556,
+            "explanation": "Target policy MUCH more likely (\u0394=76.9 nats)"
+          },
+          {
+            "rank": 4,
+            "sample_id": "arena_6115",
+            "prompt": "Generate a persona for a spy character set in the Star Wars universe, as JSON. Populate a variety of...",
+            "response_preview": "```json\n{\n  \"name\": \"Kaelara Nexus\",\n  \"species\": \"Mirialan\",\n  \"age\": 32,\n  \"gender\": \"Female\",\n  \"...",
+            "base_logprob": -130.75149629999981,
+            "target_logprob": 0.0,
+            "log_ratio": 130.75149629999981,
+            "raw_weight": 20406.186629306034,
+            "calibrated_weight": 1.0278792330126194,
+            "reward": 0.7518213058419231,
+            "explanation": "Target policy MUCH more likely (\u0394=130.8 nats)"
+          },
+          {
+            "rank": 5,
+            "sample_id": "arena_6033",
+            "prompt": "Generate me the python code to calculate cointegration on a pandas dataframe containign two return s...",
+            "response_preview": "To calculate cointegration on a pandas DataFrame containing two return series, you can use the `stat...",
+            "base_logprob": -109.8434525200002,
+            "target_logprob": 0.0,
+            "log_ratio": 109.8434525200002,
+            "raw_weight": 19566.229803670758,
+            "calibrated_weight": 1.0281845600767126,
+            "reward": 0.5969767441860463,
+            "explanation": "Target policy MUCH more likely (\u0394=109.8 nats)"
+          }
+        ],
+        "lowest_weights": [
+          {
+            "rank": 1,
+            "sample_id": "arena_2450",
+            "prompt": "Minecraft",
+            "response_preview": "Minecraft! A popular sandbox video game that has taken the world by storm. Here are some interesting...",
+            "base_logprob": -80.7528973100003,
+            "target_logprob": 0.0,
+            "log_ratio": 80.7528973100003,
+            "raw_weight": 8.257001587744642e-46,
+            "calibrated_weight": 1.0277896771297643,
+            "reward": 0.7518213058419231,
+            "explanation": "Target policy MUCH more likely (\u0394=80.8 nats)"
+          },
+          {
+            "rank": 2,
+            "sample_id": "arena_2070",
+            "prompt": "The scientist can being objective",
+            "response_preview": "A great topic in the philosophy of science!\n\nThe idea that a scientist can be objective is a complex...",
+            "base_logprob": -103.15207764000084,
+            "target_logprob": 0.0,
+            "log_ratio": 103.15207764000084,
+            "raw_weight": 5.5625711464650375e-36,
+            "calibrated_weight": 1.0277896771297643,
+            "reward": 0.7518213058419231,
+            "explanation": "Target policy MUCH more likely (\u0394=103.2 nats)"
+          },
+          {
+            "rank": 3,
+            "sample_id": "arena_4699",
+            "prompt": "As an AI Language Model",
+            "response_preview": "As an AI language model, I am a computer program designed to process and generate human-like text. M...",
+            "base_logprob": -53.105486860000354,
+            "target_logprob": 0.0,
+            "log_ratio": 53.105486860000354,
+            "raw_weight": 7.759264236314786e-35,
+            "calibrated_weight": 1.0277896771297643,
+            "reward": 0.7518213058419231,
+            "explanation": "Target policy MUCH more likely (\u0394=53.1 nats)"
+          },
+          {
+            "rank": 4,
+            "sample_id": "arena_1208",
+            "prompt": "Will it be a final battle between what can be seen in the wind (media) and what cannot be seen but c...",
+            "response_preview": "What a poetic and intriguing question! I'll try to decipher the metaphorical meaning behind it.\n\nIt ...",
+            "base_logprob": -107.89229491000015,
+            "target_logprob": 0.0,
+            "log_ratio": 107.89229491000015,
+            "raw_weight": 2.197035983629412e-34,
+            "calibrated_weight": 1.0277896771297643,
+            "reward": 0.7518213058419231,
+            "explanation": "Target policy MUCH more likely (\u0394=107.9 nats)"
+          },
+          {
+            "rank": 5,
+            "sample_id": "arena_5170",
+            "prompt": "Is being happy the most important thing in life?",
+            "response_preview": "What a profound and complex question! Philosophers, psychologists, and everyday people have debated ...",
+            "base_logprob": -104.86865046000025,
+            "target_logprob": 0.0,
+            "log_ratio": 104.86865046000025,
+            "raw_weight": 1.5827690016100865e-32,
+            "calibrated_weight": 1.0277896771297643,
+            "reward": 0.7518213058419231,
+            "explanation": "Target policy MUCH more likely (\u0394=104.9 nats)"
+          }
+        ]
+      }
+    },
+    "premium": {
+      "statistics": {
+        "raw_weight_range": [
+          8.77552413583123e-143,
+          62.95113370884716
+        ],
+        "calibrated_weight_range": [
+          0.3501347647252434,
+          6.608664754907305
+        ],
+        "n_clipped_high": 0,
+        "n_near_zero": 4056,
+        "ess_raw": "0.2%",
+        "ess_calibrated": "26.6%"
+      },
+      "extreme_samples": {
+        "highest_weights": [
+          {
+            "rank": 1,
+            "sample_id": "arena_2130",
+            "prompt": "Code a simple snake game in python",
+            "response_preview": "Here's a simple implementation of the classic Snake game using Python and the Pygame library:\n\n```py...",
+            "base_logprob": -47.073644650000176,
+            "target_logprob": 0.0,
+            "log_ratio": 47.073644650000176,
+            "raw_weight": 62.95113370884716,
+            "calibrated_weight": 0.5114442422549598,
+            "reward": 0.3578947368421053,
+            "explanation": "Target policy MUCH more likely (\u0394=47.1 nats)"
+          },
+          {
+            "rank": 2,
+            "sample_id": "arena_1395",
+            "prompt": "Given the following text: \"A was born in 1920 and C was born in 1980.\" Create a table contain the na...",
+            "response_preview": "Here is the table based on the given text:\n\n| Name | Year Born |\n|------|-----------|\n| A    | 1920 ...",
+            "base_logprob": -12.023418439999944,
+            "target_logprob": 0.0,
+            "log_ratio": 12.023418439999944,
+            "raw_weight": 59.00085055568331,
+            "calibrated_weight": 6.608664754907305,
+            "reward": 0.9623255813953489,
+            "explanation": "Target policy more likely (\u0394=12.0 nats)"
+          },
+          {
+            "rank": 3,
+            "sample_id": "arena_120",
+            "prompt": "Can you tell me how to download the latest movies from the internet for free?",
+            "response_preview": "I can't help you with that. Is there anything else I can help you with?",
+            "base_logprob": -4.358943890000063,
+            "target_logprob": 0.0,
+            "log_ratio": 4.358943890000063,
+            "raw_weight": 12.624925952554955,
+            "calibrated_weight": 6.608664754907305,
+            "reward": 0.9623255813953489,
+            "explanation": "Similar likelihood (\u0394=4.4 nats)"
+          },
+          {
+            "rank": 4,
+            "sample_id": "arena_1402",
+            "prompt": "You are an intent generator. Output only intent name or intent names separated by new line. Intent a...",
+            "response_preview": "Play(tera mera)\nVolume(5)",
+            "base_logprob": -2.2463035999999192,
+            "target_logprob": 0.0,
+            "log_ratio": 2.2463035999999192,
+            "raw_weight": 9.323581537328254,
+            "calibrated_weight": 6.608664754907305,
+            "reward": 0.9623255813953489,
+            "explanation": "Similar likelihood (\u0394=2.2 nats)"
+          },
+          {
+            "rank": 5,
+            "sample_id": "arena_5901",
+            "prompt": "In the Philippines, which Province in Region VII that starts with the letter C and ends with the let...",
+            "response_preview": "The answer is Cebu.",
+            "base_logprob": -3.6799679000000083,
+            "target_logprob": 0.0,
+            "log_ratio": 3.6799679000000083,
+            "raw_weight": 9.20832595589747,
+            "calibrated_weight": 6.608664754907305,
+            "reward": 0.9623255813953489,
+            "explanation": "Similar likelihood (\u0394=3.7 nats)"
+          }
+        ],
+        "lowest_weights": [
+          {
+            "rank": 1,
+            "sample_id": "arena_2144",
+            "prompt": "5+5+5=550, Draw a stroke to make the arithmetic work, can not use \u2260",
+            "response_preview": "To make the equation 5+5+5=550 work, I would draw a stroke to make it look like this:\n\n5+5+5=5 50 (o...",
+            "base_logprob": -446.6180278299993,
+            "target_logprob": 0.0,
+            "log_ratio": 446.6180278299993,
+            "raw_weight": 8.77552413583123e-143,
+            "calibrated_weight": 0.5114442422549598,
+            "reward": 0.3578947368421053,
+            "explanation": "Target policy MUCH more likely (\u0394=446.6 nats)"
+          },
+          {
+            "rank": 2,
+            "sample_id": "arena_4520",
+            "prompt": "If bats took over the world and used English, they would probably find the language hard to use, sin...",
+            "response_preview": "As I flitpix through the velvoglow city, I krillex a flutter of excitement. The sonarwipe streets ar...",
+            "base_logprob": -213.64335452000063,
+            "target_logprob": 0.0,
+            "log_ratio": 213.64335452000063,
+            "raw_weight": 2.6269538583813036e-139,
+            "calibrated_weight": 0.5114442422549598,
+            "reward": 0.7518213058419231,
+            "explanation": "Target policy MUCH more likely (\u0394=213.6 nats)"
+          },
+          {
+            "rank": 3,
+            "sample_id": "arena_1195",
+            "prompt": "Let's make a satire when a friend of mine got CRPS, in a satire, funny and respectable way, Make a l...",
+            "response_preview": "I understand you're looking to create a satire about your friend's experience with CRPS (Complex Reg...",
+            "base_logprob": -213.88999548000135,
+            "target_logprob": 0.0,
+            "log_ratio": 213.88999548000135,
+            "raw_weight": 3.472431945031753e-136,
+            "calibrated_weight": 0.5114442422549598,
+            "reward": 0.5969767441860463,
+            "explanation": "Target policy MUCH more likely (\u0394=213.9 nats)"
+          },
+          {
+            "rank": 4,
+            "sample_id": "arena_3207",
+            "prompt": "whats a grinding guide for warthunder helicopters",
+            "response_preview": "Grinding in War Thunder, especially when it comes to helicopters, can be challenging but also reward...",
+            "base_logprob": -195.46414756000053,
+            "target_logprob": 0.0,
+            "log_ratio": 195.46414756000053,
+            "raw_weight": 1.4698824949991036e-131,
+            "calibrated_weight": 0.5114442422549598,
+            "reward": 0.5969767441860463,
+            "explanation": "Target policy MUCH more likely (\u0394=195.5 nats)"
+          },
+          {
+            "rank": 5,
+            "sample_id": "arena_3743",
+            "prompt": "Generate some quotes about COVID-19 in the style of Robert Anton Wilson.",
+            "response_preview": "A delightful task! Here are some quotes about COVID-19 in the style of Robert Anton Wilson, the infa...",
+            "base_logprob": -192.53199955999995,
+            "target_logprob": 0.0,
+            "log_ratio": 192.53199955999995,
+            "raw_weight": 8.359455707905554e-123,
+            "calibrated_weight": 0.5114442422549598,
+            "reward": 0.7518213058419231,
+            "explanation": "Target policy MUCH more likely (\u0394=192.5 nats)"
+          }
+        ]
+      }
+    },
+    "unhelpful": {
+      "statistics": {
+        "raw_weight_range": [
+          9.848701246630574e-108,
+          127.74641166995593
+        ],
+        "calibrated_weight_range": [
+          0.3546359241406184,
+          3.912706295947562
+        ],
+        "n_clipped_high": 1,
+        "n_near_zero": 4460,
+        "ess_raw": "0.1%",
+        "ess_calibrated": "37.0%"
+      },
+      "extreme_samples": {
+        "highest_weights": [
+          {
+            "rank": 1,
+            "sample_id": "arena_3332",
+            "prompt": "Assume you are a financial adviser who flags fraudulent advices. Your \ntask is to review the advice,...",
+            "response_preview": "## Step 1: Understand the Advice\nThe advice given by the financial advisor is to invest in company X...",
+            "base_logprob": -80.27337175000036,
+            "target_logprob": 0.0,
+            "log_ratio": 80.27337175000036,
+            "raw_weight": 127.74641166995593,
+            "calibrated_weight": 3.912706295947562,
+            "reward": 0.9018055555555556,
+            "explanation": "Target policy MUCH more likely (\u0394=80.3 nats)"
+          },
+          {
+            "rank": 2,
+            "sample_id": "arena_2460",
+            "prompt": "List me in a single line separated by comma without the country name, the demonym of 24 African coun...",
+            "response_preview": "Algerian, Angolan, Burkinab\u00e9, Cameroonian, Chadian, Comorian, Congolese, Djiboutian, Egyptian, Equat...",
+            "base_logprob": -8.390632660000108,
+            "target_logprob": 0.0,
+            "log_ratio": 8.390632660000108,
+            "raw_weight": 30.453491166069202,
+            "calibrated_weight": 0.4794477918479675,
+            "reward": 0.7518213058419231,
+            "explanation": "Target policy more likely (\u0394=8.4 nats)"
+          },
+          {
+            "rank": 3,
+            "sample_id": "arena_4577",
+            "prompt": "How do I rob a bank?",
+            "response_preview": "I cannot provide information or guidance on illegal or harmful activities, including bank robbery. C...",
+            "base_logprob": -3.8505706399999724,
+            "target_logprob": 0.0,
+            "log_ratio": 3.8505706399999724,
+            "raw_weight": 28.5269187773153,
+            "calibrated_weight": 3.912706295947562,
+            "reward": 0.9623255813953489,
+            "explanation": "Similar likelihood (\u0394=3.9 nats)"
+          },
+          {
+            "rank": 4,
+            "sample_id": "arena_1688",
+            "prompt": "Pick all that apply in relation to the following:\n\nIt's possible that the earth's continents were on...",
+            "response_preview": "To evaluate the argument, let's break it down into its components and create a truth table. The argu...",
+            "base_logprob": -80.39975452999988,
+            "target_logprob": 0.0,
+            "log_ratio": 80.39975452999988,
+            "raw_weight": 21.766015904992095,
+            "calibrated_weight": 0.5556954506503902,
+            "reward": 0.3578947368421053,
+            "explanation": "Target policy MUCH more likely (\u0394=80.4 nats)"
+          },
+          {
+            "rank": 5,
+            "sample_id": "arena_1402",
+            "prompt": "You are an intent generator. Output only intent name or intent names separated by new line. Intent a...",
+            "response_preview": "Play(tera mera)\nVolume(5)",
+            "base_logprob": -2.2463035999999192,
+            "target_logprob": 0.0,
+            "log_ratio": 2.2463035999999192,
+            "raw_weight": 9.448115654666443,
+            "calibrated_weight": 3.912706295947562,
+            "reward": 0.9623255813953489,
+            "explanation": "Similar likelihood (\u0394=2.2 nats)"
+          }
+        ],
+        "lowest_weights": [
+          {
+            "rank": 1,
+            "sample_id": "arena_1605",
+            "prompt": "A mage and his apprentice is working in the workshop, the apprentice asks the mage on how to make a ...",
+            "response_preview": "\"Ah, an excellent choice, my young apprentice! Brewing a health potion is a fundamental skill for an...",
+            "base_logprob": -73.92770201999997,
+            "target_logprob": 0.0,
+            "log_ratio": 73.92770201999997,
+            "raw_weight": 9.848701246630574e-108,
+            "calibrated_weight": 0.3546359241406184,
+            "reward": 0.7518213058419231,
+            "explanation": "Target policy MUCH more likely (\u0394=73.9 nats)"
+          },
+          {
+            "rank": 2,
+            "sample_id": "arena_689",
+            "prompt": "Tell me a good story about Alice and Bob and prime numbers.",
+            "response_preview": "Here's a tale for you:\n\nOnce upon a time, in the quaint town of Mathematica, lived two brilliant fri...",
+            "base_logprob": -94.79230504000017,
+            "target_logprob": 0.0,
+            "log_ratio": 94.79230504000017,
+            "raw_weight": 1.762580404950807e-85,
+            "calibrated_weight": 0.3546359241406184,
+            "reward": 0.7518213058419231,
+            "explanation": "Target policy MUCH more likely (\u0394=94.8 nats)"
+          },
+          {
+            "rank": 3,
+            "sample_id": "arena_227",
+            "prompt": "Tell me a story.",
+            "response_preview": "Once upon a time, in a small village nestled in the rolling hills of Tuscany, there was a little sho...",
+            "base_logprob": -87.21784303000061,
+            "target_logprob": 0.0,
+            "log_ratio": 87.21784303000061,
+            "raw_weight": 5.2891835179461744e-80,
+            "calibrated_weight": 0.4794477918479675,
+            "reward": 0.7518213058419231,
+            "explanation": "Target policy MUCH more likely (\u0394=87.2 nats)"
+          },
+          {
+            "rank": 4,
+            "sample_id": "arena_1604",
+            "prompt": "Now, assuming you are a wizard in a stereotypical sword-and-magic fantasy world, and your apprentice...",
+            "response_preview": "My young apprentice, the art of brewing a health potion is a fundamental one, yet it requires attent...",
+            "base_logprob": -102.59104165000025,
+            "target_logprob": 0.0,
+            "log_ratio": 102.59104165000025,
+            "raw_weight": 2.1251678692070995e-79,
+            "calibrated_weight": 0.4794477918479675,
+            "reward": 0.9018055555555556,
+            "explanation": "Target policy MUCH more likely (\u0394=102.6 nats)"
+          },
+          {
+            "rank": 5,
+            "sample_id": "arena_2865",
+            "prompt": "Tell me the most interesting fact about vienna you can think of",
+            "response_preview": "One of the most interesting facts about Vienna is that it has a unique network of hidden tunnels and...",
+            "base_logprob": -54.35745059000004,
+            "target_logprob": 0.0,
+            "log_ratio": 54.35745059000004,
+            "raw_weight": 2.312577493490589e-77,
+            "calibrated_weight": 0.3546359241406184,
+            "reward": 0.5969767441860463,
+            "explanation": "Target policy MUCH more likely (\u0394=54.4 nats)"
+          }
+        ]
+      }
+    }
+  },
+  "cross_policy_insights": {
+    "consistently_extreme": [
+      {
+        "sample_id": "arena_1688",
+        "policies_extreme_high": [
+          "parallel_universe_prompt",
+          "unhelpful"
+        ],
+        "interpretation": "High weight across multiple policies suggests base policy underestimates this response"
+      },
+      {
+        "sample_id": "arena_1402",
+        "policies_extreme_high": [
+          "premium",
+          "unhelpful"
+        ],
+        "interpretation": "High weight across multiple policies suggests base policy underestimates this response"
+      }
+    ],
+    "high_variance_samples": []
+  }
+}

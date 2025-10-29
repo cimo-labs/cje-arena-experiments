@@ -1,111 +1,136 @@
 #!/usr/bin/env python3
-"""Verify that the CJE Arena Experiments environment is set up correctly."""
+"""
+Quick verification script to check that the CJE arena experiments are set up correctly.
+
+Run this after installation to verify:
+1. CJE library is installed
+2. Data files are present
+3. A minimal analysis runs successfully
+"""
 
 import sys
 from pathlib import Path
 
 
-def check_import(module_name: str, package_name: str = None) -> bool:
-    """Check if a module can be imported."""
-    display_name = package_name or module_name
+def check_cje_install():
+    """Verify CJE library is installed."""
+    print("Checking CJE installation...", end=" ")
     try:
-        __import__(module_name)
-        print(f"✓ {display_name} installed")
+        import cje
+        print(f"✓ (version {cje.__version__})")
         return True
     except ImportError:
-        print(f"✗ {display_name} not found - install with: pip install {package_name or module_name}")
+        print("✗")
+        print("  ERROR: CJE not installed. Run: pip install -r requirements.txt")
         return False
 
 
-def check_file(filepath: Path, required: bool = True) -> bool:
-    """Check if a file exists."""
-    exists = filepath.exists()
-    size_str = f"({filepath.stat().st_size / 1024 / 1024:.1f}MB)" if exists else ""
-    marker = "✓" if exists else ("✗" if required else "⚠")
-    status = "found" if exists else ("MISSING" if required else "optional, not found")
-    print(f"{marker} {filepath} {size_str} - {status}")
-    return exists or not required
+def check_data_files():
+    """Verify required data files exist."""
+    print("Checking data files...", end=" ")
+    data_dir = Path("data")
+
+    if not data_dir.exists():
+        print("✗")
+        print("  ERROR: data/ directory not found")
+        return False
+
+    required_files = [
+        "data/cje_dataset.jsonl",
+        "data/prompts.jsonl",
+    ]
+
+    missing = []
+    for file_path in required_files:
+        if not Path(file_path).exists():
+            missing.append(file_path)
+
+    if missing:
+        print("✗")
+        print(f"  ERROR: Missing files: {', '.join(missing)}")
+        return False
+
+    print("✓")
+    return True
 
 
-def main() -> int:
-    """Run all verification checks."""
+def check_fresh_draws():
+    """Check if fresh draws directory exists."""
+    print("Checking fresh draws...", end=" ")
+    fresh_draws = Path("data/responses")
+
+    if not fresh_draws.exists():
+        print("⚠")
+        print("  WARNING: data/responses/ not found (needed for DR estimators)")
+        print("  Direct methods will work, but DR/TMLE/MRDR require fresh draws")
+        return True
+
+    # Count response files
+    response_files = list(fresh_draws.glob("*_responses.jsonl"))
+    if len(response_files) < 3:
+        print("⚠")
+        print(f"  WARNING: Only {len(response_files)} response files found")
+        return True
+
+    print(f"✓ ({len(response_files)} policies)")
+    return True
+
+
+def run_minimal_test():
+    """Run a minimal CJE analysis to verify everything works."""
+    print("\nRunning minimal analysis test...", end=" ")
+
+    try:
+        from cje import load_dataset_from_jsonl
+        from cje.calibration import calibrate_dataset
+
+        # Load small sample
+        dataset = load_dataset_from_jsonl("data/cje_dataset.jsonl", max_samples=100)
+
+        # Try calibration
+        calibrated = calibrate_dataset(
+            dataset,
+            oracle_coverage=0.25,
+            calibration_mode="auto",
+            random_seed=42
+        )
+
+        print("✓")
+        print(f"  Successfully calibrated {len(calibrated.samples)} samples")
+        return True
+
+    except Exception as e:
+        print("✗")
+        print(f"  ERROR: {str(e)}")
+        return False
+
+
+def main():
     print("=" * 60)
     print("CJE Arena Experiments - Setup Verification")
     print("=" * 60)
+    print()
 
-    all_passed = True
+    checks = [
+        check_cje_install(),
+        check_data_files(),
+        check_fresh_draws(),
+        run_minimal_test(),
+    ]
 
-    # Check Python version
-    print("\n1. Python Version:")
-    py_version = sys.version_info
-    if py_version >= (3, 9) and py_version < (3, 13):
-        print(f"✓ Python {py_version.major}.{py_version.minor}.{py_version.micro}")
-    else:
-        print(f"✗ Python {py_version.major}.{py_version.minor} - requires 3.9-3.12")
-        all_passed = False
+    print()
+    print("=" * 60)
 
-    # Check required packages
-    print("\n2. Required Packages:")
-    all_passed &= check_import("cje", "cje-eval")
-    all_passed &= check_import("numpy")
-    all_passed &= check_import("pandas")
-    all_passed &= check_import("scipy")
-    all_passed &= check_import("sklearn", "scikit-learn")
-    all_passed &= check_import("matplotlib")
-
-    # Check CJE version
-    try:
-        import cje
-        version = getattr(cje, "__version__", "unknown")
-        print(f"  CJE version: {version}")
-        if version != "unknown":
-            major, minor, patch = map(int, version.split('.'))
-            if (major, minor, patch) >= (0, 2, 3):
-                print(f"  ✓ Version {version} meets minimum requirement (0.2.3)")
-            else:
-                print(f"  ⚠ Version {version} is older than 0.2.3, consider upgrading")
-    except (ImportError, ValueError, AttributeError):
-        pass
-
-    # Check data files
-    print("\n3. Data Files:")
-    data_dir = Path("data")
-    all_passed &= check_file(data_dir / "cje_dataset.jsonl", required=True)
-    all_passed &= check_file(data_dir / "prompts.jsonl", required=True)
-    check_file(data_dir / "responses", required=False)
-    check_file(data_dir / "logprobs", required=False)
-
-    # Try to load and parse dataset
-    print("\n4. Dataset Loading:")
-    try:
-        from cje import load_dataset_from_jsonl
-        dataset = load_dataset_from_jsonl("data/cje_dataset.jsonl")
-        print(f"✓ Successfully loaded {len(dataset.samples)} samples")
-
-        # Check for required fields
-        sample = dataset.samples[0]
-        has_judge = hasattr(sample.metadata, 'judge_score')
-        has_oracle = hasattr(sample.metadata, 'oracle_label')
-        print(f"  - Judge scores: {'✓' if has_judge else '✗'}")
-        print(f"  - Oracle labels: {'✓' if has_oracle else '✗'}")
-
-        if not (has_judge and has_oracle):
-            print("  ⚠ Dataset missing required metadata fields")
-            all_passed = False
-
-    except Exception as e:
-        print(f"✗ Failed to load dataset: {e}")
-        all_passed = False
-
-    # Summary
-    print("\n" + "=" * 60)
-    if all_passed:
-        print("✓ All checks passed! You're ready to run experiments.")
-        print("\nTry: python analyze_dataset.py --data data/cje_dataset.jsonl")
+    if all(checks):
+        print("✓ All checks passed! Setup is ready.")
+        print()
+        print("Next steps:")
+        print("  • Run a quick analysis: python analyze_dataset.py")
+        print("  • Run ablations: cd ablations && python run.py")
+        print("  • See README.md for full documentation")
         return 0
     else:
-        print("✗ Some checks failed. Please address the issues above.")
-        print("\nInstall missing dependencies with: pip install -r requirements.txt")
+        print("✗ Some checks failed. See errors above.")
         return 1
 
 

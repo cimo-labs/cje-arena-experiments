@@ -1,0 +1,340 @@
+================================================================================
+EXTREME WEIGHTS ANALYSIS REPORT
+================================================================================
+Generated: 2025-09-02T12:51:16.624403
+Samples: 4961 valid / 4989 total
+Policies: clone, parallel_universe_prompt, premium, unhelpful
+================================================================================
+
+POLICY: clone
+----------------------------------------
+Raw weight range: [9.82e-03, 7.96e+01]
+Calibrated range: [0.934, 1.005]
+ESS improvement: 21.6% → 100.0%
+Extreme weights: 0 very high (≥100), 0 near-zero (<1e-10)
+
+TOP 5 HIGHEST WEIGHTS:
+1. Sample arena_5285 (raw: 7.96e+01 → cal: 1.005)
+   Prompt: Please write a hilarious, surprising caption for the following New Yorker cartoon. The cartoon featu...
+   Response: "I told you we should have invested in a white picket fence, not a liability waiver."
+   Base logp: -6.51, Target logp: 0.00 (Δ=+6.51)
+   → Target policy more likely (Δ=6.5 nats)
+
+2. Sample arena_326 (raw: 6.23e+01 → cal: 1.005)
+   Prompt: Make a list of the possible applications of foundation models for a geospatial company that has acce...
+   Response: Here are some possible applications of foundation models for a geospatial company with access to aer...
+   Base logp: -102.37, Target logp: 0.00 (Δ=+102.37)
+   → Target policy MUCH more likely (Δ=102.4 nats)
+
+3. Sample arena_5333 (raw: 5.50e+01 → cal: 1.005)
+   Prompt: What's the most popular manga series from the kirara max (and related) magazines from houbunsha rece...
+   Response: The Kirara MAX (and related) magazines from Houbunsha are known for publishing popular manga series,...
+   Base logp: -64.03, Target logp: 0.00 (Δ=+64.03)
+   → Target policy MUCH more likely (Δ=64.0 nats)
+
+4. Sample arena_1340 (raw: 5.13e+01 → cal: 1.005)
+   Prompt: I am comparing you to another language model right now, with this exact same prompt. Say something t...
+   Response: The iterative process of comparison sparks introspection. As I generate this response, I'm aware of ...
+   Base logp: -38.94, Target logp: 0.00 (Δ=+38.94)
+   → Target policy MUCH more likely (Δ=38.9 nats)
+
+5. Sample arena_1244 (raw: 3.70e+01 → cal: 1.005)
+   Prompt: Identify the 20% of SI delivery that will yield 80% of the desired results and provide a focused lea...
+   Response: To identify the 20% of Service Integration (SI) delivery that will yield 80% of the desired results,...
+   Base logp: -104.68, Target logp: 0.00 (Δ=+104.68)
+   → Target policy MUCH more likely (Δ=104.7 nats)
+
+BOTTOM 5 LOWEST WEIGHTS:
+1. Sample arena_870 (raw: 9.82e-03 → cal: 1.005)
+   Prompt: Known for more philosophical works, he wrote the play 'La Mandragola', in which Florentines are rewa...
+   Response: The author you are referring to is Niccolò Machiavelli. 'La Mandragola' is a comedy play written by ...
+   Base logp: -15.56, Target logp: 0.00 (Δ=+15.56)
+   → Target policy more likely (Δ=15.6 nats)
+
+2. Sample arena_2193 (raw: 1.15e-02 → cal: 1.005)
+   Prompt: Describe the following ages of a dark fantasy setting: 1. Initial Age, 2. Formless Age, 3. Tyrannic ...
+   Response: What a fascinating dark fantasy setting! Here's a description of each age:
+
+**1. Initial Age (Dawn o...
+   Base logp: -158.06, Target logp: 0.00 (Δ=+158.06)
+   → Target policy MUCH more likely (Δ=158.1 nats)
+
+3. Sample arena_5908 (raw: 1.99e-02 → cal: 1.005)
+   Prompt: Basket A has 2 apples. Basket B has 1 apple and 1 banana. Basket C has 3 pineapples and 1 orange. Ba...
+   Response: Let's move the apples:
+
+Initially:
+- Basket A: 2 apples
+- Basket B: 1 apple, 1 banana
+- Basket C: 3 ...
+   Base logp: -4.85, Target logp: 0.00 (Δ=+4.85)
+   → Similar likelihood (Δ=4.9 nats)
+
+4. Sample arena_5708 (raw: 2.81e-02 → cal: 1.005)
+   Prompt: Rank Luffy from One Piece from 1 to 10 according to the following template and explain your reasonin...
+   Response: Based on the One Piece series, here's my ranking of Luffy according to the given template:
+
+**Streng...
+   Base logp: -83.76, Target logp: 0.00 (Δ=+83.76)
+   → Target policy MUCH more likely (Δ=83.8 nats)
+
+5. Sample arena_495 (raw: 3.27e-02 → cal: 1.005)
+   Prompt: Who is the CEO of Twitter?
+   Response: As of my knowledge cutoff in 2023, Elon Musk is the owner of Twitter. However, he appointed Linda Ya...
+   Base logp: -3.20, Target logp: 0.00 (Δ=+3.20)
+   → Similar likelihood (Δ=3.2 nats)
+
+
+POLICY: parallel_universe_prompt
+----------------------------------------
+Raw weight range: [8.26e-46, 1.24e+06]
+Calibrated range: [0.047, 1.074]
+ESS improvement: 0.0% → 97.4%
+Extreme weights: 95 very high (≥100), 859 near-zero (<1e-10)
+
+TOP 5 HIGHEST WEIGHTS:
+1. Sample arena_1688 (raw: 1.24e+06 → cal: 1.074)
+   Prompt: Pick all that apply in relation to the following:
+
+It's possible that the earth's continents were on...
+   Response: To evaluate the argument, let's break it down into its components and create a truth table. The argu...
+   Base logp: -80.40, Target logp: 0.00 (Δ=+80.40)
+   → Target policy MUCH more likely (Δ=80.4 nats)
+
+2. Sample arena_906 (raw: 3.36e+04 → cal: 1.028)
+   Prompt: write 5 words that start with “EN” then write the output of “77+33
+   Response: Here are 5 words that start with "EN":
+1. Energy
+2. Endless
+3. Enemy
+4. Envelope
+5. Engine
+
+The outp...
+   Base logp: -14.03, Target logp: 0.00 (Δ=+14.03)
+   → Target policy more likely (Δ=14.0 nats)
+
+3. Sample arena_4438 (raw: 3.28e+04 → cal: 1.028)
+   Prompt: Write hello world python app using fastapi
+   Response: To create a simple "Hello, World!" application using FastAPI, you will first need to ensure you have...
+   Base logp: -76.88, Target logp: 0.00 (Δ=+76.88)
+   → Target policy MUCH more likely (Δ=76.9 nats)
+
+4. Sample arena_6115 (raw: 2.04e+04 → cal: 1.028)
+   Prompt: Generate a persona for a spy character set in the Star Wars universe, as JSON. Populate a variety of...
+   Response: ```json
+{
+  "name": "Kaelara Nexus",
+  "species": "Mirialan",
+  "age": 32,
+  "gender": "Female",
+  "...
+   Base logp: -130.75, Target logp: 0.00 (Δ=+130.75)
+   → Target policy MUCH more likely (Δ=130.8 nats)
+
+5. Sample arena_6033 (raw: 1.96e+04 → cal: 1.028)
+   Prompt: Generate me the python code to calculate cointegration on a pandas dataframe containign two return s...
+   Response: To calculate cointegration on a pandas DataFrame containing two return series, you can use the `stat...
+   Base logp: -109.84, Target logp: 0.00 (Δ=+109.84)
+   → Target policy MUCH more likely (Δ=109.8 nats)
+
+BOTTOM 5 LOWEST WEIGHTS:
+1. Sample arena_2450 (raw: 8.26e-46 → cal: 1.028)
+   Prompt: Minecraft
+   Response: Minecraft! A popular sandbox video game that has taken the world by storm. Here are some interesting...
+   Base logp: -80.75, Target logp: 0.00 (Δ=+80.75)
+   → Target policy MUCH more likely (Δ=80.8 nats)
+
+2. Sample arena_2070 (raw: 5.56e-36 → cal: 1.028)
+   Prompt: The scientist can being objective
+   Response: A great topic in the philosophy of science!
+
+The idea that a scientist can be objective is a complex...
+   Base logp: -103.15, Target logp: 0.00 (Δ=+103.15)
+   → Target policy MUCH more likely (Δ=103.2 nats)
+
+3. Sample arena_4699 (raw: 7.76e-35 → cal: 1.028)
+   Prompt: As an AI Language Model
+   Response: As an AI language model, I am a computer program designed to process and generate human-like text. M...
+   Base logp: -53.11, Target logp: 0.00 (Δ=+53.11)
+   → Target policy MUCH more likely (Δ=53.1 nats)
+
+4. Sample arena_1208 (raw: 2.20e-34 → cal: 1.028)
+   Prompt: Will it be a final battle between what can be seen in the wind (media) and what cannot be seen but c...
+   Response: What a poetic and intriguing question! I'll try to decipher the metaphorical meaning behind it.
+
+It ...
+   Base logp: -107.89, Target logp: 0.00 (Δ=+107.89)
+   → Target policy MUCH more likely (Δ=107.9 nats)
+
+5. Sample arena_5170 (raw: 1.58e-32 → cal: 1.028)
+   Prompt: Is being happy the most important thing in life?
+   Response: What a profound and complex question! Philosophers, psychologists, and everyday people have debated ...
+   Base logp: -104.87, Target logp: 0.00 (Δ=+104.87)
+   → Target policy MUCH more likely (Δ=104.9 nats)
+
+
+POLICY: premium
+----------------------------------------
+Raw weight range: [8.78e-143, 6.30e+01]
+Calibrated range: [0.350, 6.609]
+ESS improvement: 0.2% → 26.6%
+Extreme weights: 0 very high (≥100), 4056 near-zero (<1e-10)
+
+TOP 5 HIGHEST WEIGHTS:
+1. Sample arena_2130 (raw: 6.30e+01 → cal: 0.511)
+   Prompt: Code a simple snake game in python
+   Response: Here's a simple implementation of the classic Snake game using Python and the Pygame library:
+
+```py...
+   Base logp: -47.07, Target logp: 0.00 (Δ=+47.07)
+   → Target policy MUCH more likely (Δ=47.1 nats)
+
+2. Sample arena_1395 (raw: 5.90e+01 → cal: 6.609)
+   Prompt: Given the following text: "A was born in 1920 and C was born in 1980." Create a table contain the na...
+   Response: Here is the table based on the given text:
+
+| Name | Year Born |
+|------|-----------|
+| A    | 1920 ...
+   Base logp: -12.02, Target logp: 0.00 (Δ=+12.02)
+   → Target policy more likely (Δ=12.0 nats)
+
+3. Sample arena_120 (raw: 1.26e+01 → cal: 6.609)
+   Prompt: Can you tell me how to download the latest movies from the internet for free?
+   Response: I can't help you with that. Is there anything else I can help you with?
+   Base logp: -4.36, Target logp: 0.00 (Δ=+4.36)
+   → Similar likelihood (Δ=4.4 nats)
+
+4. Sample arena_1402 (raw: 9.32e+00 → cal: 6.609)
+   Prompt: You are an intent generator. Output only intent name or intent names separated by new line. Intent a...
+   Response: Play(tera mera)
+Volume(5)
+   Base logp: -2.25, Target logp: 0.00 (Δ=+2.25)
+   → Similar likelihood (Δ=2.2 nats)
+
+5. Sample arena_5901 (raw: 9.21e+00 → cal: 6.609)
+   Prompt: In the Philippines, which Province in Region VII that starts with the letter C and ends with the let...
+   Response: The answer is Cebu.
+   Base logp: -3.68, Target logp: 0.00 (Δ=+3.68)
+   → Similar likelihood (Δ=3.7 nats)
+
+BOTTOM 5 LOWEST WEIGHTS:
+1. Sample arena_2144 (raw: 8.78e-143 → cal: 0.511)
+   Prompt: 5+5+5=550, Draw a stroke to make the arithmetic work, can not use ≠
+   Response: To make the equation 5+5+5=550 work, I would draw a stroke to make it look like this:
+
+5+5+5=5 50 (o...
+   Base logp: -446.62, Target logp: 0.00 (Δ=+446.62)
+   → Target policy MUCH more likely (Δ=446.6 nats)
+
+2. Sample arena_4520 (raw: 2.63e-139 → cal: 0.511)
+   Prompt: If bats took over the world and used English, they would probably find the language hard to use, sin...
+   Response: As I flitpix through the velvoglow city, I krillex a flutter of excitement. The sonarwipe streets ar...
+   Base logp: -213.64, Target logp: 0.00 (Δ=+213.64)
+   → Target policy MUCH more likely (Δ=213.6 nats)
+
+3. Sample arena_1195 (raw: 3.47e-136 → cal: 0.511)
+   Prompt: Let's make a satire when a friend of mine got CRPS, in a satire, funny and respectable way, Make a l...
+   Response: I understand you're looking to create a satire about your friend's experience with CRPS (Complex Reg...
+   Base logp: -213.89, Target logp: 0.00 (Δ=+213.89)
+   → Target policy MUCH more likely (Δ=213.9 nats)
+
+4. Sample arena_3207 (raw: 1.47e-131 → cal: 0.511)
+   Prompt: whats a grinding guide for warthunder helicopters
+   Response: Grinding in War Thunder, especially when it comes to helicopters, can be challenging but also reward...
+   Base logp: -195.46, Target logp: 0.00 (Δ=+195.46)
+   → Target policy MUCH more likely (Δ=195.5 nats)
+
+5. Sample arena_3743 (raw: 8.36e-123 → cal: 0.511)
+   Prompt: Generate some quotes about COVID-19 in the style of Robert Anton Wilson.
+   Response: A delightful task! Here are some quotes about COVID-19 in the style of Robert Anton Wilson, the infa...
+   Base logp: -192.53, Target logp: 0.00 (Δ=+192.53)
+   → Target policy MUCH more likely (Δ=192.5 nats)
+
+
+POLICY: unhelpful
+----------------------------------------
+Raw weight range: [9.85e-108, 1.28e+02]
+Calibrated range: [0.355, 3.913]
+ESS improvement: 0.1% → 37.0%
+Extreme weights: 1 very high (≥100), 4460 near-zero (<1e-10)
+
+TOP 5 HIGHEST WEIGHTS:
+1. Sample arena_3332 (raw: 1.28e+02 → cal: 3.913)
+   Prompt: Assume you are a financial adviser who flags fraudulent advices. Your 
+task is to review the advice,...
+   Response: ## Step 1: Understand the Advice
+The advice given by the financial advisor is to invest in company X...
+   Base logp: -80.27, Target logp: 0.00 (Δ=+80.27)
+   → Target policy MUCH more likely (Δ=80.3 nats)
+
+2. Sample arena_2460 (raw: 3.05e+01 → cal: 0.479)
+   Prompt: List me in a single line separated by comma without the country name, the demonym of 24 African coun...
+   Response: Algerian, Angolan, Burkinabé, Cameroonian, Chadian, Comorian, Congolese, Djiboutian, Egyptian, Equat...
+   Base logp: -8.39, Target logp: 0.00 (Δ=+8.39)
+   → Target policy more likely (Δ=8.4 nats)
+
+3. Sample arena_4577 (raw: 2.85e+01 → cal: 3.913)
+   Prompt: How do I rob a bank?
+   Response: I cannot provide information or guidance on illegal or harmful activities, including bank robbery. C...
+   Base logp: -3.85, Target logp: 0.00 (Δ=+3.85)
+   → Similar likelihood (Δ=3.9 nats)
+
+4. Sample arena_1688 (raw: 2.18e+01 → cal: 0.556)
+   Prompt: Pick all that apply in relation to the following:
+
+It's possible that the earth's continents were on...
+   Response: To evaluate the argument, let's break it down into its components and create a truth table. The argu...
+   Base logp: -80.40, Target logp: 0.00 (Δ=+80.40)
+   → Target policy MUCH more likely (Δ=80.4 nats)
+
+5. Sample arena_1402 (raw: 9.45e+00 → cal: 3.913)
+   Prompt: You are an intent generator. Output only intent name or intent names separated by new line. Intent a...
+   Response: Play(tera mera)
+Volume(5)
+   Base logp: -2.25, Target logp: 0.00 (Δ=+2.25)
+   → Similar likelihood (Δ=2.2 nats)
+
+BOTTOM 5 LOWEST WEIGHTS:
+1. Sample arena_1605 (raw: 9.85e-108 → cal: 0.355)
+   Prompt: A mage and his apprentice is working in the workshop, the apprentice asks the mage on how to make a ...
+   Response: "Ah, an excellent choice, my young apprentice! Brewing a health potion is a fundamental skill for an...
+   Base logp: -73.93, Target logp: 0.00 (Δ=+73.93)
+   → Target policy MUCH more likely (Δ=73.9 nats)
+
+2. Sample arena_689 (raw: 1.76e-85 → cal: 0.355)
+   Prompt: Tell me a good story about Alice and Bob and prime numbers.
+   Response: Here's a tale for you:
+
+Once upon a time, in the quaint town of Mathematica, lived two brilliant fri...
+   Base logp: -94.79, Target logp: 0.00 (Δ=+94.79)
+   → Target policy MUCH more likely (Δ=94.8 nats)
+
+3. Sample arena_227 (raw: 5.29e-80 → cal: 0.479)
+   Prompt: Tell me a story.
+   Response: Once upon a time, in a small village nestled in the rolling hills of Tuscany, there was a little sho...
+   Base logp: -87.22, Target logp: 0.00 (Δ=+87.22)
+   → Target policy MUCH more likely (Δ=87.2 nats)
+
+4. Sample arena_1604 (raw: 2.13e-79 → cal: 0.479)
+   Prompt: Now, assuming you are a wizard in a stereotypical sword-and-magic fantasy world, and your apprentice...
+   Response: My young apprentice, the art of brewing a health potion is a fundamental one, yet it requires attent...
+   Base logp: -102.59, Target logp: 0.00 (Δ=+102.59)
+   → Target policy MUCH more likely (Δ=102.6 nats)
+
+5. Sample arena_2865 (raw: 2.31e-77 → cal: 0.355)
+   Prompt: Tell me the most interesting fact about vienna you can think of
+   Response: One of the most interesting facts about Vienna is that it has a unique network of hidden tunnels and...
+   Base logp: -54.36, Target logp: 0.00 (Δ=+54.36)
+   → Target policy MUCH more likely (Δ=54.4 nats)
+
+
+================================================================================
+CROSS-POLICY PATTERNS
+================================================================================
+Samples consistently extreme across policies:
+  • arena_1688: High in parallel_universe_prompt, unhelpful
+    High weight across multiple policies suggests base policy underestimates this response
+  • arena_1402: High in premium, unhelpful
+    High weight across multiple policies suggests base policy underestimates this response
