@@ -93,7 +93,7 @@ def check_results():
         print("NOT FOUND (optional)")
         print("  Pre-computed results not found (1.3GB)")
         print("  To regenerate: cd ablations && python run.py")
-        return True  # Not a failure
+        return True  # Not a failure - results are optional
 
     # Check size
     size_gb = results_file.stat().st_size / (1024**3)

@@ -1,5 +1,5 @@
-# CJE library (main dependency)
-cje-eval>=0.2.5
+# CJE library (pinned for reproducibility)
+cje-eval==0.2.5
 
 # Core scientific computing (already in cje-eval, listed for clarity)
 numpy>=1.26

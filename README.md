@@ -177,8 +177,9 @@ Note: The `unhelpful` policy typically scores very low (< 0.2) by design and is 
   - `data/responses/` - Fresh draws for DR estimators
   - `data/logprobs/` - Log probabilities for all policies (multiple passes)
 
-**Not included (you regenerate):**
+**Not included (regenerate locally):**
 - Ablation results (~1.3GB) - Run `cd ablations && python run.py`
+- Uses cje-eval 0.2.5 (pinned in requirements.txt for reproducibility)
 
 ## Advanced: Data Generation
 
