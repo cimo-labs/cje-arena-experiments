@@ -688,7 +688,7 @@ def build_table_ess_comparison(df: pd.DataFrame, results_path: str = "results/al
     """Build comprehensive weight diagnostics comparison table.
 
     Shows how SIMCal weight calibration improves all weight diagnostics:
-    ESS, Weight CV, Max Weight, and Tail Index.
+    ESS, Weight CV, Max Weight, Tail Index, TTC, and CLE Factor.
 
     Args:
         df: Tidy DataFrame from io.load_results_jsonl
@@ -698,6 +698,21 @@ def build_table_ess_comparison(df: pd.DataFrame, results_path: str = "results/al
         DataFrame with comprehensive weight diagnostic comparison
     """
     import json
+
+    # TTC and CLE Factor are policy-level constants (computed from dataset logprobs)
+    # These explain why IPS fails even with high ESS
+    TTC_VALUES = {
+        "clone": 0.796,
+        "parallel_universe_prompt": 0.494,
+        "premium": 0.190,
+        "unhelpful": 0.256,
+    }
+    CLE_FACTOR_VALUES = {
+        "clone": 1.9,
+        "parallel_universe_prompt": 60.5,
+        "premium": 23.8,
+        "unhelpful": 37.6,
+    }
 
     # Load raw results for weight_cv, max_weight, tail_alpha
     # Initialize the nested structure
@@ -787,6 +802,10 @@ def build_table_ess_comparison(df: pd.DataFrame, results_path: str = "results/al
             tail_improve = ((cal_tail - raw_tail) / raw_tail * 100) if raw_tail > 0 else 0
             tail_improve_str = f"{tail_improve:+.0f}%"
 
+        # Get TTC and CLE Factor for this policy
+        ttc = TTC_VALUES.get(policy, 0.0)
+        cle_factor = CLE_FACTOR_VALUES.get(policy, 0.0)
+
         comparison_data.append({
             "Policy": policy.replace("_", " ").title(),
             "ESS % (SNIPS→Cal)": f"{raw_ess:.1f}% → {cal_ess:.1f}%",
@@ -797,6 +816,8 @@ def build_table_ess_comparison(df: pd.DataFrame, results_path: str = "results/al
             "Max Δ": f"{max_improve:+.0f}%",
             "Tail α (SNIPS→Cal)": tail_str,
             "Tail Δ": tail_improve_str,
+            "TTC (β̂)": f"{ttc:.1%}",
+            "CLE Factor": f"{cle_factor:.1f}×",
         })
 
     if not comparison_data:

@@ -238,10 +238,13 @@ def format_table_m1(
 
 def format_table_ess_comparison(
     df: pd.DataFrame,
-    caption: str = "Weight Diagnostics: SIMCal Calibration Effect",
+    caption: str = "Weight Diagnostics: SIMCal Effect and CLE Diagnostics",
     label: str = "tab:weight-diagnostics",
 ) -> str:
     """Format comprehensive weight diagnostics comparison table as LaTeX.
+
+    Includes TTC (Target-Typicality Coverage) and CLE Factor to explain
+    why IPS fails even with high ESS after SIMCal.
 
     Args:
         df: DataFrame from build_table_ess_comparison
@@ -257,39 +260,64 @@ def format_table_ess_comparison(
     lines.append("\\centering")
     lines.append(f"\\caption{{{caption}}}")
     lines.append(f"\\label{{{label}}}")
-    lines.append("\\setlength{\\tabcolsep}{4pt} % tighten columns a bit")
+    lines.append("\\setlength{\\tabcolsep}{3pt} % tighten columns")
     lines.append("\\resizebox{\\linewidth}{!}{%")
 
-    # Create tabular - we need more columns now
-    lines.append("\\begin{tabular}{l|cc|cc|cc|cc}")
+    # Create tabular with TTC and CLE Factor columns
+    lines.append("\\begin{tabular}{l|cc|cc|cc|c|c}")
     lines.append("\\toprule")
 
-    # Header rows
-    lines.append("& \\multicolumn{2}{c|}{ESS (\\%)} & \\multicolumn{2}{c|}{Weight CV} & \\multicolumn{2}{c|}{Max Weight} & \\multicolumn{2}{c}{Tail $\\alpha$} \\\\")
-    lines.append("Policy & SNIPS$\\to$Cal & $\\Delta$ & SNIPS$\\to$Cal & $\\Delta$ & SNIPS$\\to$Cal & $\\Delta$ & SNIPS$\\to$Cal & $\\Delta$ \\\\")
+    # Header rows - grouped headers for ESS, CV, Tail, then single columns for TTC/CLE
+    lines.append("& \\multicolumn{2}{c|}{ESS (\\%)} & \\multicolumn{2}{c|}{Weight CV} & \\multicolumn{2}{c|}{Tail $\\alpha$} & & \\\\")
+    lines.append("Policy & SNIPS & SIMCal & SNIPS & SIMCal & SNIPS & SIMCal & TTC ($\\hat\\beta$) & CLE Factor \\\\")
     lines.append("\\midrule")
 
     # Add rows
     for _, row in df.iterrows():
         policy = row["Policy"]
 
-        # Extract values (they're already formatted as strings) and make LaTeX-safe
-        ess_change = latex_safe_value(row["ESS % (SNIPS→Cal)"])
-        ess_delta = latex_safe_value(row["ESS Δ"])
-        cv_change = latex_safe_value(row["Weight CV (SNIPS→Cal)"])
-        cv_delta = latex_safe_value(row["CV Δ"])
-        max_change = latex_safe_value(row["Max Weight (SNIPS→Cal)"])
-        max_delta = latex_safe_value(row["Max Δ"])
-        tail_change = latex_safe_value(row["Tail α (SNIPS→Cal)"])
-        tail_delta = latex_safe_value(row["Tail Δ"])
+        # Parse ESS values from "X% → Y%" format
+        ess_str = row["ESS % (SNIPS→Cal)"]
+        if "→" in ess_str:
+            ess_parts = ess_str.split("→")
+            ess_before = ess_parts[0].strip()
+            ess_after = ess_parts[1].strip()
+        else:
+            ess_before = ess_str
+            ess_after = ess_str
+
+        # Parse CV values
+        cv_str = row["Weight CV (SNIPS→Cal)"]
+        if "→" in cv_str:
+            cv_parts = cv_str.split("→")
+            cv_before = cv_parts[0].strip()
+            cv_after = cv_parts[1].strip()
+        else:
+            cv_before = cv_str
+            cv_after = cv_str
+
+        # Parse tail values
+        tail_str = row["Tail α (SNIPS→Cal)"]
+        if "→" in tail_str:
+            tail_parts = tail_str.split("→")
+            tail_before = tail_parts[0].strip()
+            tail_after = tail_parts[1].strip()
+        else:
+            tail_before = tail_str
+            tail_after = tail_str
+
+        # Get TTC and CLE Factor
+        ttc = latex_safe_value(row.get("TTC (β̂)", "---"))
+        cle_factor = latex_safe_value(row.get("CLE Factor", "---"))
 
         # Format the row
-        lines.append(f"{policy} & {ess_change} & {ess_delta} & {cv_change} & {cv_delta} & "
-                    f"{max_change} & {max_delta} & {tail_change} & {tail_delta} \\\\")
+        lines.append(f"{policy} & {ess_before} & {ess_after} & {cv_before} & {cv_after} & "
+                    f"{tail_before} & {tail_after} & {ttc} & {cle_factor} \\\\")
 
     lines.append("\\bottomrule")
     lines.append("\\end{tabular}")
     lines.append("}")  # Close resizebox
+    lines.append("\\footnotesize{TTC = Target-Typicality Coverage ($\\hat\\beta$); CLE Factor = coverage penalty $\\times$ shape mismatch.}")
     lines.append("\\end{table}")
 
     return "\n".join(lines)
