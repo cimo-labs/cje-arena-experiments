@@ -4,7 +4,7 @@ Quick verification script to check that the CJE arena experiments are set up cor
 
 Run this after installation to verify:
 1. CJE library is installed
-2. Data files are present (download if missing)
+2. Data files are present (included in repo)
 3. A minimal analysis runs successfully
 """
 
@@ -32,7 +32,7 @@ def check_data_files():
 
     if not data_dir.exists():
         print("MISSING")
-        print("  Run: python download_data.py")
+        print("  Data directory not found - repo may be incomplete")
         return False
 
     required_files = [
@@ -47,7 +47,7 @@ def check_data_files():
     if missing:
         print("MISSING")
         print(f"  Missing: {', '.join(missing)}")
-        print("  Run: python download_data.py")
+        print("  Data files should be included in repo - check git clone")
         return False
 
     # Check file size to ensure it's not empty/corrupted
@@ -55,7 +55,7 @@ def check_data_files():
     if dataset_size < 1_000_000:  # Should be ~10MB
         print("CORRUPTED")
         print(f"  File too small ({dataset_size} bytes)")
-        print("  Run: python download_data.py --force")
+        print("  Re-clone the repository to get fresh data")
         return False
 
     print("OK")
@@ -70,7 +70,7 @@ def check_fresh_draws():
     if not fresh_draws.exists():
         print("MISSING (optional)")
         print("  Fresh draws needed for DR estimators")
-        print("  Run: python download_data.py")
+        print("  Re-clone repo or regenerate with data_generation scripts")
         return True  # Not a failure, just a warning
 
     # Count response files
@@ -90,10 +90,9 @@ def check_results():
     results_file = Path("ablations/results/all_experiments.jsonl")
 
     if not results_file.exists():
-        print("NOT DOWNLOADED (optional)")
+        print("NOT FOUND (optional)")
         print("  Pre-computed results not found (1.3GB)")
-        print("  To download: python download_data.py --include-results")
-        print("  Or regenerate: cd ablations && python run.py")
+        print("  To regenerate: cd ablations && python run.py")
         return True  # Not a failure
 
     # Check size
@@ -110,8 +109,8 @@ def run_minimal_test():
         from cje import load_dataset_from_jsonl
         from cje.calibration import calibrate_dataset
 
-        # Load small sample
-        dataset = load_dataset_from_jsonl("data/cje_dataset.jsonl", max_samples=100)
+        # Load dataset (full load, but calibration is fast)
+        dataset = load_dataset_from_jsonl("data/cje_dataset.jsonl")
 
         # Try calibration
         calibrated, _ = calibrate_dataset(
@@ -169,7 +168,7 @@ def main():
         print()
         print("To fix:")
         print("  1. pip install -r requirements.txt")
-        print("  2. python download_data.py")
+        print("  2. Ensure repo was cloned with all data files")
         return 1
 
 

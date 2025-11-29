@@ -14,8 +14,8 @@ from typing import Dict, List, Optional, Any
 
 import sys
 
-sys.path.append(str(Path(__file__).parent.parent.parent.parent))
-sys.path.append(str(Path(__file__).parent.parent))  # Add arena_10k_simplified to path
+# sys.path hack removed - cje-eval installed via pip
+sys.path.append(str(Path(__file__).parent.parent))  # Add repo root to path for local imports
 
 from cje.teacher_forcing import compute_chat_logprob
 from cje.data.models import LogProbResult, LogProbStatus

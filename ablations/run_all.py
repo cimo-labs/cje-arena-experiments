@@ -16,8 +16,8 @@ import logging
 from pathlib import Path
 
 # Add parent to path for cje imports
-sys.path.append(str(Path(__file__).parent.parent))
-sys.path.append(str(Path(__file__).parent.parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent))
+# Removed: unnecessary path hack for standalone repo
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 logger = logging.getLogger(__name__)

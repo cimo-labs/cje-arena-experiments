@@ -40,12 +40,6 @@ def weight_cv(weights: np.ndarray) -> float:
     return float(np.std(weights) / mean_w)
 
 
-# Add parent directories to path for imports
-import sys
-
-sys.path.append(str(Path(__file__).parent.parent.parent))
-sys.path.append(str(Path(__file__).parent.parent.parent.parent))
-
 from cje import load_dataset_from_jsonl
 from cje.calibration import calibrate_dataset
 from cje.data.precomputed_sampler import PrecomputedSampler

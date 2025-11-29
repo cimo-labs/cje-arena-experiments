@@ -6,7 +6,7 @@ This module generates journal-quality tables for CJE ablation experiments, using
 
 Generate all main tables:
 ```bash
-cd /path/to/cje/experiments/arena_10k_simplified/ablations
+cd /path/to/ablations
 
 python -m reporting.cli_generate \
   --results results/all_experiments.jsonl \

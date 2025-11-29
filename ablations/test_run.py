@@ -14,8 +14,8 @@ import logging
 from pathlib import Path
 
 # Add parent directories to path (same as run.py)
-sys.path.append(str(Path(__file__).parent.parent))
-sys.path.append(str(Path(__file__).parent.parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent))
+# Removed: unnecessary path hack for standalone repo
 
 from config import DATA_PATH
 from core.base import BaseAblation

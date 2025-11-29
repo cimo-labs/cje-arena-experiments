@@ -38,7 +38,7 @@ class SIMCalConfig:
 ```
 
 ### 2. **Oracle Sampling in prepare_dataset()**
-**Location**: `cje/experiments/arena_10k_simplified/ablations/core/base.py:132`
+**Location**: `ablations/core/base.py:132`
 
 **Issue**:
 ```python
@@ -52,7 +52,7 @@ keep_indices = set(
 - This IS deterministic given the same seed
 
 ### 3. **Dataset Sampling**
-**Location**: `cje/experiments/arena_10k_simplified/ablations/core/base.py:110-115`
+**Location**: `ablations/core/base.py:110-115`
 
 **Issue**:
 ```python
@@ -97,7 +97,7 @@ return int.from_bytes(hash_bytes, "big") % n_folds
 - This is correctly designed
 
 ### 7. **Outer CV Seeds in Estimators**
-**Location**: `cje/experiments/arena_10k_simplified/ablations/core/base.py:201, 210, 220`
+**Location**: `ablations/core/base.py:201, 210, 220`
 
 **Issue**:
 ```python
@@ -267,4 +267,4 @@ Thread-safety note: Each worker gets its own seed, so this should be fine IF see
 - Fold management: `cje/data/folds.py`
 - SIMCal: `cje/calibration/simcal.py`
 - JudgeCalibrator: `cje/calibration/judge.py`
-- Ablation runner: `cje/experiments/arena_10k_simplified/ablations/core/base.py`
+- Ablation runner: `ablations/core/base.py`

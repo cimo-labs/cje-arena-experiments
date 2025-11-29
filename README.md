@@ -24,19 +24,11 @@ cd cje-arena-experiments
 # 2. Install dependencies (includes cje-eval library)
 pip install -r requirements.txt
 
-# 3. Download data from HuggingFace
-python download_data.py
-
-# 4. Verify setup
+# 3. Verify setup
 python verify_setup.py
 ```
 
-**Data hosting:** Dataset files are hosted on HuggingFace at [`cimo-labs/cje-arena-data`](https://huggingface.co/datasets/cimo-labs/cje-arena-data).
-
-**Optional:** Download pre-computed results (1.3GB) to skip running ablations:
-```bash
-python download_data.py --include-results
-```
+**Note:** All data files (~300MB) are included in the repository. No separate download required.
 
 ## Quick Start
 
@@ -180,13 +172,13 @@ Note: The `unhelpful` policy typically scores very low (< 0.2) by design and is 
 
 - **Code:** Full ablation pipeline, analysis scripts, and visualization tools
 - **Documentation:** Comprehensive READMEs explaining the experimental design
-- **Data (downloaded separately):** ~45MB from HuggingFace via `download_data.py`
-  - `cje_dataset.jsonl` - Main dataset with prompts, responses, logprobs
-  - `responses/` - Fresh draws for DR estimators
+- **Data (~300MB):** Included in repository
+  - `data/cje_dataset.jsonl` - Main dataset with prompts, responses, logprobs
+  - `data/responses/` - Fresh draws for DR estimators
+  - `data/logprobs/` - Log probabilities for all policies (multiple passes)
 
-**Optional downloads:**
-- Pre-computed results (1.3GB) - Use `--include-results` flag
-- Or regenerate by running `ablations/run.py`
+**Not included (you regenerate):**
+- Ablation results (~1.3GB) - Run `cd ablations && python run.py`
 
 ## Advanced: Data Generation
 

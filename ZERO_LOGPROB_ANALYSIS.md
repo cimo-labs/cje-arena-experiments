@@ -2,7 +2,7 @@
 
 ## Summary
 
-The arena_10k_simplified dataset contains 27 samples with exactly 0.0 log probability, representing cases where the model assigns 100% probability (P=1.0) to the response. **These are credible and expected** for highly deterministic tasks, not data generation bugs.
+This dataset contains 27 samples with exactly 0.0 log probability, representing cases where the model assigns 100% probability (P=1.0) to the response. **These are credible and expected** for highly deterministic tasks, not data generation bugs.
 
 ## Key Finding
 
