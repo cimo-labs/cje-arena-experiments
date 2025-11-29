@@ -4,7 +4,7 @@ Quick verification script to check that the CJE arena experiments are set up cor
 
 Run this after installation to verify:
 1. CJE library is installed
-2. Data files are present
+2. Data files are present (download if missing)
 3. A minimal analysis runs successfully
 """
 
@@ -17,11 +17,11 @@ def check_cje_install():
     print("Checking CJE installation...", end=" ")
     try:
         import cje
-        print(f"✓ (version {cje.__version__})")
+        print(f"OK (version {cje.__version__})")
         return True
     except ImportError:
-        print("✗")
-        print("  ERROR: CJE not installed. Run: pip install -r requirements.txt")
+        print("MISSING")
+        print("  Run: pip install -r requirements.txt")
         return False
 
 
@@ -31,13 +31,12 @@ def check_data_files():
     data_dir = Path("data")
 
     if not data_dir.exists():
-        print("✗")
-        print("  ERROR: data/ directory not found")
+        print("MISSING")
+        print("  Run: python download_data.py")
         return False
 
     required_files = [
         "data/cje_dataset.jsonl",
-        "data/prompts.jsonl",
     ]
 
     missing = []
@@ -46,11 +45,20 @@ def check_data_files():
             missing.append(file_path)
 
     if missing:
-        print("✗")
-        print(f"  ERROR: Missing files: {', '.join(missing)}")
+        print("MISSING")
+        print(f"  Missing: {', '.join(missing)}")
+        print("  Run: python download_data.py")
         return False
 
-    print("✓")
+    # Check file size to ensure it's not empty/corrupted
+    dataset_size = Path("data/cje_dataset.jsonl").stat().st_size
+    if dataset_size < 1_000_000:  # Should be ~10MB
+        print("CORRUPTED")
+        print(f"  File too small ({dataset_size} bytes)")
+        print("  Run: python download_data.py --force")
+        return False
+
+    print("OK")
     return True
 
 
@@ -60,19 +68,37 @@ def check_fresh_draws():
     fresh_draws = Path("data/responses")
 
     if not fresh_draws.exists():
-        print("⚠")
-        print("  WARNING: data/responses/ not found (needed for DR estimators)")
-        print("  Direct methods will work, but DR/TMLE/MRDR require fresh draws")
-        return True
+        print("MISSING (optional)")
+        print("  Fresh draws needed for DR estimators")
+        print("  Run: python download_data.py")
+        return True  # Not a failure, just a warning
 
     # Count response files
     response_files = list(fresh_draws.glob("*_responses.jsonl"))
     if len(response_files) < 3:
-        print("⚠")
-        print(f"  WARNING: Only {len(response_files)} response files found")
+        print(f"PARTIAL ({len(response_files)} policies)")
+        print("  Some fresh draw files missing")
         return True
 
-    print(f"✓ ({len(response_files)} policies)")
+    print(f"OK ({len(response_files)} policies)")
+    return True
+
+
+def check_results():
+    """Check if pre-computed results exist."""
+    print("Checking pre-computed results...", end=" ")
+    results_file = Path("ablations/results/all_experiments.jsonl")
+
+    if not results_file.exists():
+        print("NOT DOWNLOADED (optional)")
+        print("  Pre-computed results not found (1.3GB)")
+        print("  To download: python download_data.py --include-results")
+        print("  Or regenerate: cd ablations && python run.py")
+        return True  # Not a failure
+
+    # Check size
+    size_gb = results_file.stat().st_size / (1024**3)
+    print(f"OK ({size_gb:.1f}GB)")
     return True
 
 
@@ -88,19 +114,20 @@ def run_minimal_test():
         dataset = load_dataset_from_jsonl("data/cje_dataset.jsonl", max_samples=100)
 
         # Try calibration
-        calibrated = calibrate_dataset(
+        calibrated, _ = calibrate_dataset(
             dataset,
-            oracle_coverage=0.25,
+            oracle_field="oracle_label",
+            judge_field="judge_score",
             calibration_mode="auto",
-            random_seed=42
+            random_seed=42,
         )
 
-        print("✓")
-        print(f"  Successfully calibrated {len(calibrated.samples)} samples")
+        print("OK")
+        print(f"  Calibrated {len(calibrated.samples)} samples successfully")
         return True
 
     except Exception as e:
-        print("✗")
+        print("FAILED")
         print(f"  ERROR: {str(e)}")
         return False
 
@@ -112,25 +139,37 @@ def main():
     print()
 
     checks = [
-        check_cje_install(),
-        check_data_files(),
-        check_fresh_draws(),
-        run_minimal_test(),
+        ("CJE library", check_cje_install()),
+        ("Data files", check_data_files()),
+        ("Fresh draws", check_fresh_draws()),
+        ("Results", check_results()),
     ]
+
+    # Only run minimal test if data is present
+    if checks[1][1]:  # Data files check passed
+        checks.append(("Analysis test", run_minimal_test()))
 
     print()
     print("=" * 60)
 
-    if all(checks):
-        print("✓ All checks passed! Setup is ready.")
+    required_passed = all(passed for name, passed in checks[:2])  # CJE + data
+    all_passed = all(passed for name, passed in checks)
+
+    if required_passed:
+        print("Setup is ready!")
         print()
-        print("Next steps:")
-        print("  • Run a quick analysis: python analyze_dataset.py")
-        print("  • Run ablations: cd ablations && python run.py")
-        print("  • See README.md for full documentation")
+        print("Quick start:")
+        print("  python analyze_dataset.py --data data/cje_dataset.jsonl")
+        print()
+        print("Run ablations:")
+        print("  cd ablations && python run.py")
         return 0
     else:
-        print("✗ Some checks failed. See errors above.")
+        print("Setup incomplete. See errors above.")
+        print()
+        print("To fix:")
+        print("  1. pip install -r requirements.txt")
+        print("  2. python download_data.py")
         return 1
 
 

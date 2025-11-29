@@ -1,5 +1,5 @@
 # CJE library (main dependency)
-cje-eval>=0.2.3
+cje-eval>=0.2.5
 
 # Core scientific computing (already in cje-eval, listed for clarity)
 numpy>=1.26
@@ -13,6 +13,9 @@ seaborn>=0.13.2
 
 # Progress bars
 tqdm
+
+# Data download from HuggingFace
+huggingface_hub>=0.20.0
 
 # For data generation (optional - only if regenerating dataset)
 # Uncomment if you need to regenerate responses:

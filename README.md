@@ -24,11 +24,19 @@ cd cje-arena-experiments
 # 2. Install dependencies (includes cje-eval library)
 pip install -r requirements.txt
 
-# 3. Verify setup
+# 3. Download data from HuggingFace
+python download_data.py
+
+# 4. Verify setup
 python verify_setup.py
 ```
 
-The dataset (~288MB) is included in the repository. Ablation results (~11GB) are excluded—you'll regenerate them by running the experiments.
+**Data hosting:** Dataset files are hosted on HuggingFace at [`cimo-labs/cje-arena-data`](https://huggingface.co/datasets/cimo-labs/cje-arena-data).
+
+**Optional:** Download pre-computed results (1.3GB) to skip running ablations:
+```bash
+python download_data.py --include-results
+```
 
 ## Quick Start
 
@@ -170,13 +178,15 @@ Note: The `unhelpful` policy typically scores very low (< 0.2) by design and is 
 
 ## What's Included
 
-- **Dataset:** 288MB of Arena data with judge scores, oracle labels, and logprobs (in `data/`)
 - **Code:** Full ablation pipeline, analysis scripts, and visualization tools
 - **Documentation:** Comprehensive READMEs explaining the experimental design
+- **Data (downloaded separately):** ~45MB from HuggingFace via `download_data.py`
+  - `cje_dataset.jsonl` - Main dataset with prompts, responses, logprobs
+  - `responses/` - Fresh draws for DR estimators
 
-**Not included (you regenerate these):**
-- Ablation results (~11GB) - Run `ablations/run.py` to generate
-- Additional fresh draws - Use scripts in `data_generation/` if needed
+**Optional downloads:**
+- Pre-computed results (1.3GB) - Use `--include-results` flag
+- Or regenerate by running `ablations/run.py`
 
 ## Advanced: Data Generation
 
