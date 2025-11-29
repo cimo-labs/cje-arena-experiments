@@ -40,16 +40,16 @@ python run.py  # Run all experiments with checkpoint/resume support
 # Or run individual analysis on the dataset
 python analyze_dataset.py --data data/cje_dataset.jsonl --estimator stacked-dr
 
-# Generate tables and plots from ablation results
+# Generate tables from ablation results (after running experiments)
 cd ablations/
-python analyze_simple.py  # Generate summary tables and basic analysis
+python -m reporting.cli_generate --results results/all_experiments.jsonl --output results/
 ```
 
 ## Directory Structure
 
 - **`ablations/`** - Unified ablation system with all experiments
   - `run.py` - Main experiment runner with checkpoint/resume
-  - `analyze_simple.py` - Analysis script for results
+  - `reporting/` - Analysis and table generation tools
   - `config.py` - Experiment configuration
   - See ablations/README.md for details
 - **`analyze_dataset.py`** - Direct CJE analysis with detailed diagnostics  
@@ -124,10 +124,10 @@ cd ablations/
 python run.py
 
 # Quick test with reduced parameters
-python test_quick.py  # Runs 5 experiments to verify setup
+python test_run.py  # Runs minimal config to verify setup
 
-# Analyze existing results
-python analyze_simple.py  # Generate summary tables and plots
+# Generate tables from results (after running experiments)
+python -m reporting.cli_generate --results results/all_experiments.jsonl --output results/
 
 # Analyze with detailed diagnostics
 python analyze_dataset.py --data "data/cje_dataset.jsonl" --estimator calibrated-ips
