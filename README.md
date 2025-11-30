@@ -95,7 +95,7 @@ python add_scores_with_resume.py --input ../data/responses/ --output ../data/
 python prepare_cje_data.py --output ../data/cje_dataset.jsonl
 
 # 6. (Optional) Generate multiple passes to study API non-determinism
-source ../../../set_secrets.sh  # REQUIRED: Load API keys
+# Requires FIREWORKS_API_KEY environment variable
 python generate_additional_passes.py --data-dir ../data --n-passes 5
 ```
 
@@ -220,8 +220,8 @@ Each directory contains:
 Generate multiple passes to study API non-determinism and improve data quality:
 
 ```bash
-# IMPORTANT: Must load API keys first!
-source ../../../set_secrets.sh
+# IMPORTANT: Set API keys first
+export FIREWORKS_API_KEY=your_key
 
 # Generate passes 2-5 for all policies
 python data_generation/generate_additional_passes.py --data-dir data --n-passes 5
