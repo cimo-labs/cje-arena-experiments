@@ -5,7 +5,7 @@ Systematic ablation studies demonstrating the value of calibrated importance sam
 ## Quick Start
 
 ```bash
-# Run all ablation experiments (360 total)
+# Run all ablation experiments (~19,000 total across 50 seeds)
 python run.py       # Runs with checkpoint/resume support
 
 # Generate paper tables and analysis
@@ -59,27 +59,26 @@ ablations/
 The unified system (`run.py`) tests all combinations of:
 
 ### Parameters
-- **Estimators**: raw-ips, calibrated-ips, orthogonalized-ips, dr-cpo, oc-dr-cpo, tr-cpo, stacked-dr
-- **Sample sizes**: 500, 1000, 2500, 5000
+- **Estimators**: direct, naive-direct, raw-ips, calibrated-ips, dr-cpo, tr-cpo-e, stacked-dr
+- **Sample sizes**: 250, 500, 1000, 2500, 5000
 - **Oracle coverage**: 5%, 10%, 25%, 50%, 100%
 - **Weight Calibration (SIMCal)**: On/off (controlled by `use_weight_calibration`, with constraints)
 - **Covariates**: On/off (controlled by `use_covariates`) - tests with/without response_length covariate
-- **IIC (Isotonic Influence Control)**: On/off for all methods (controlled by `use_iic`)
-- **Seed**: Single seed (42) for reproducibility
+- **Seeds**: 50 seeds (0-49) for robust variance estimates
 
 ### Estimator Constraints
 Some estimators have calibration requirements:
-- **Always calibrated**: calibrated-ips, orthogonalized-ips, oc-dr-cpo
-- **Never calibrated**: raw-ips, tr-cpo (TR-CPO uses raw/Hájek weights for theoretical correctness)
-- **Optional calibration**: dr-cpo, stacked-dr
+- **Always calibrated**: calibrated-ips, stacked-dr
+- **Never calibrated**: direct, naive-direct, raw-ips, tr-cpo-e
+- **Optional calibration**: dr-cpo
 
-This reduces the total experiments to 3,600 valid combinations (10 seeds × 360 unique configs).
+Total: ~19,000 experiments across all parameter combinations.
 
 ### Expected Results
-- **SIMCal weight calibration**: Should improve DR methods (reduces weight variance)
-- **Covariates**: Response-level features (response_length) can improve calibration and outcome modeling
-- **IIC**: 5-20% standard error reduction (variance-only, preserves point estimates)
-- **DR methods**: Critical when n < 500 or oracle < 10%
+- **SIMCal weight calibration**: Improves ESS from <1% to >80% (see paper Table 3)
+- **Covariates**: Response-level features (response_length) improve calibration
+- **Direct+cov**: Best ranking accuracy (94.3% pairwise)
+- **DR methods**: Robust under limited overlap
 - **Stacked-DR**: Most robust across scenarios
 
 ## Output Files
@@ -90,16 +89,12 @@ This reduces the total experiments to 3,600 valid combinations (10 seeds × 360 
   - `estimates`: Policy value estimates
   - `standard_errors`: Uncertainty estimates
   - `rmse_vs_oracle`: Error vs ground truth
-  - `orthogonality_scores`: DR orthogonality diagnostic (should be near 0)
-  - `iic_diagnostics`: Per-policy R² and SE reduction from IIC
   - `ess_relative`: Effective sample size as percentage
   - `hellinger_affinity`: Structural overlap measure (higher is better)
 
-### Analysis Outputs
-- `results/analysis/main_comparison.csv`: Summary table
-- `results/analysis/calibration_comparison.csv`: Calibration on/off comparison
-- `results/analysis/iic_comparison.csv`: IIC on/off comparison
-- `results/analysis/rmse_by_configuration.png`: Main visualization
+### Generated Tables
+- `tables/main/`: Main paper tables (M1 accuracy, M2 ESS comparison, M3 gates)
+- `tables/quadrant/`: Quadrant-specific breakdowns
 
 ## Running Specific Configurations
 
@@ -111,19 +106,15 @@ EXPERIMENTS = {
     'sample_sizes': [1000],                       # Single size
     'oracle_coverages': [0.10],                   # Single coverage
     'use_weight_calibration': [True],             # Just with weight calibration
-    'use_iic': [False],                          # No IIC
-    'n_seeds': 2,                                 # Fewer seeds
+    'use_covariates': [False],                    # Without covariates
+    'seeds': np.arange(0, 5, 1),                  # Fewer seeds
 }
 ```
 
 Then run: `python run.py`
 
-## Legacy Code
-
-The `legacy/` directory contains the original ablation implementation for reference. This code has been fully replaced by the unified system but is preserved for validation and historical context.
-
 ## Notes
 
-- All diagnostics now come from the main CJE library (no local duplicates)
-- The system uses the Arena 10k dataset by default (see config.py to change)
+- All diagnostics come from the CJE library (no local duplicates)
 - Fresh draws are auto-loaded for DR methods when available
+- Checkpoint/resume support: experiments resume from where they left off

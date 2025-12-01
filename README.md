@@ -10,7 +10,7 @@ This repository contains the experimental pipeline used to benchmark the **[CJE 
 
 ## Overview
 
-Ablation study of CJE estimators on simulated competition data, demonstrating 13.9× ESS improvement with SIMCal.
+Reproduction of the CJE paper's Arena benchmark: 4,961 prompts, 5 policies, 13 estimators. Run the full ablation study locally without API calls.
 
 ## Setup
 
@@ -33,7 +33,7 @@ python verify_setup.py
 ## Quick Start
 
 ```bash
-# Run comprehensive ablation studies (1800 experiments)
+# Run comprehensive ablation studies (~19,000 experiments across 50 seeds)
 cd ablations/
 python run.py  # Run all experiments with checkpoint/resume support
 
@@ -61,14 +61,22 @@ python -m reporting.cli_generate --results results/all_experiments.jsonl --outpu
 - **`data_generation/`** - Scripts to reproduce dataset from scratch
 - **`experiment_config.py`** - Policy definitions for data generation
 
-## Key Results
+## Key Results (from paper)
 
-| Method | ESS | Error vs Oracle |
-|--------|-----|-----------------|
-| **CalibratedIPS** | 62.7% | 0.038 |
-| **RawIPS** | 4.5% | 0.175 |
+**Ranking Accuracy** (Table 1):
+| Estimator | Pairwise Accuracy | Kendall τ |
+|-----------|-------------------|-----------|
+| direct+cov | **94.3%** | **0.89** |
+| SNIPS (uncalibrated) | 38.3% | -0.24 |
 
-**Impact**: 13.9× better ESS, 4.5× lower error, works with 2% oracle labels (20 samples)
+**Weight Stabilization** (Table 3 - SIMCal ESS improvement):
+| Policy | SNIPS → SIMCal | Uplift |
+|--------|----------------|--------|
+| Clone | 26.2% → 99.0% | 3.8× |
+| Premium | 0.7% → 82.1% | 117× |
+| Unhelpful | 0.4% → 84.6% | 212× |
+
+**Cost**: 9× reduction vs pure oracle labeling at 94% ranking accuracy
 
 ## Data Generation Pipeline
 
@@ -101,7 +109,7 @@ python generate_additional_passes.py --data-dir ../data --n-passes 5
 
 ## Dataset Details
 
-**Main Dataset**: `data/cje_dataset.jsonl` (4989 samples)
+**Main Dataset**: `data/cje_dataset.jsonl` (4,989 samples; 4,961 with complete logprobs)
 - **Policies**: 
   - `base` - Llama-70B with standard helpful assistant prompt (logging policy)
   - `clone` - Same model and prompt as base (for control/comparison)
@@ -198,15 +206,10 @@ python prepare_arena_data.py
 
 ## Output
 
-Results saved to `ablations/results/` organized by experiment type:
-- `oracle_coverage/` - Oracle coverage ablation results and figures
-- `sample_size/` - Sample size scaling results and figures  
-- `estimator_comparison/` - Estimator comparison results and figures
-- `interaction/` - Interaction analysis results and figures
-
-Each directory contains:
-- `results.jsonl` - Detailed results with diagnostics
-- `figure_*.png` - Visualization of results
+After running experiments, results are saved to:
+- `ablations/results/all_experiments.jsonl` - Raw experiment results (one line per run)
+- `ablations/results/checkpoint.jsonl` - Progress tracking for resume
+- `ablations/tables/` - Generated paper tables (after running `reporting.cli_generate`)
 
 ## Known Issues
 
