@@ -256,13 +256,16 @@ Pass files are named: `{policy}_logprobs_pass{N}.jsonl` where N=2,3,4,5...
 If you use this code, please cite the paper:
 
 ```bibtex
-@article{landesberg2025cje,
+@misc{landesberg2025cje,
   title = {Causal Judge Evaluation: Calibrated Surrogate Metrics for LLM Systems},
   author = {Landesberg, Eddie},
   year = {2025},
-  journal = {arXiv preprint}
+  publisher = {Zenodo},
+  doi = {10.5281/zenodo.XXXXXXX}
 }
 ```
+
+*(Update the DOI after Zenodo upload)*
 
 ## License
 
