@@ -33,7 +33,7 @@ python verify_setup.py
 ## Quick Start
 
 ```bash
-# Run comprehensive ablation studies (~19,000 experiments across 50 seeds)
+# Run comprehensive ablation studies (16,250 experiments across 50 seeds)
 cd ablations/
 python run.py  # Run all experiments with checkpoint/resume support
 
@@ -73,6 +73,7 @@ python -m reporting.cli_generate --results results/all_experiments.jsonl --outpu
 | Policy | SNIPS → SIMCal | Uplift |
 |--------|----------------|--------|
 | Clone | 26.2% → 99.0% | 3.8× |
+| Parallel Universe | 0.6% → 95.4% | 159× |
 | Premium | 0.7% → 82.1% | 117× |
 | Unhelpful | 0.4% → 84.6% | 212× |
 
@@ -150,7 +151,7 @@ python analyze_dataset.py --data "data/cje_dataset.jsonl" --estimator stacked-dr
 ## Method
 
 SIMCal calibration process:
-1. Learn judge→oracle mapping via isotonic regression (2% labels)
+1. Learn judge→oracle mapping via isotonic regression (5-25% oracle labels)
 2. Project weights onto monotone functions of judge score
 3. Cap variance increase at ρ=2  
 4. Result: Smooth weights, preserved unbiasedness
@@ -252,14 +253,14 @@ Pass files are named: `{policy}_logprobs_pass{N}.jsonl` where N=2,3,4,5...
 
 ## Citation
 
-If you use this code, please cite the CJE library:
+If you use this code, please cite the paper:
 
 ```bibtex
-@software{cje2024,
-  title = {CJE: Causal Judge Evaluation},
+@article{landesberg2025cje,
+  title = {Causal Judge Evaluation: Calibrated Surrogate Metrics for LLM Systems},
   author = {Landesberg, Eddie},
-  year = {2024},
-  url = {https://github.com/cimo-labs/cje}
+  year = {2025},
+  journal = {arXiv preprint}
 }
 ```
 
