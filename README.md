@@ -4,7 +4,7 @@ Reproduction code for the Chatbot Arena experiments from the CJE paper.
 
 This repository contains the experimental pipeline used to benchmark the **[CJE library](https://github.com/cimo-labs/cje)** on real-world LLM evaluation data from the [LMSYS Chatbot Arena](https://huggingface.co/datasets/lmsys/chatbot_arena_conversations).
 
-**Full results**: [Arena Experiment Blog Post](https://www.cimolabs.com/blog/arena-experiment)
+**Full results**: [Arena Experiment](https://www.cimolabs.com/research/arena-experiment)
 
 ---
 
@@ -77,7 +77,7 @@ python -m reporting.cli_generate --results results/all_experiments.jsonl --outpu
 | Premium | 0.7% → 82.1% | 117× |
 | Unhelpful | 0.4% → 84.6% | 212× |
 
-**Cost**: 9× reduction vs pure oracle labeling at 94% ranking accuracy
+**Cost**: 9× reduction vs pure oracle labeling at 99% ranking accuracy
 
 ## Data Generation Pipeline
 
@@ -261,11 +261,9 @@ If you use this code, please cite the paper:
   author = {Landesberg, Eddie},
   year = {2025},
   publisher = {Zenodo},
-  doi = {10.5281/zenodo.XXXXXXX}
+  doi = {10.5281/zenodo.17807414}
 }
 ```
-
-*(Update the DOI after Zenodo upload)*
 
 ## License
 
