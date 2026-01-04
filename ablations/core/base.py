@@ -40,6 +40,12 @@ def weight_cv(weights: np.ndarray) -> float:
     return float(np.std(weights) / mean_w)
 
 
+# Add parent directories to path for imports
+import sys
+
+sys.path.append(str(Path(__file__).parent.parent.parent))
+sys.path.append(str(Path(__file__).parent.parent.parent.parent))
+
 from cje import load_dataset_from_jsonl
 from cje.calibration import calibrate_dataset
 from cje.data.precomputed_sampler import PrecomputedSampler
@@ -78,7 +84,7 @@ class BaseAblation:
 
     def prepare_dataset(
         self, spec: ExperimentSpec, seed: int
-    ) -> Tuple[Any, int, Dict[int, Any]]:
+    ) -> Tuple[Any, int, Dict[int, Any], set]:
         """Load and prepare dataset with oracle masking.
 
         Args:
@@ -86,7 +92,10 @@ class BaseAblation:
             seed: Random seed
 
         Returns:
-            (dataset, n_oracle, original_oracle_labels)
+            (dataset, n_oracle, original_oracle_labels, oracle_prompt_ids)
+            - oracle_prompt_ids: Set of prompt IDs that have oracle labels after masking.
+              Used to ensure fresh_draws in bootstrap use the SAME oracle slice, preventing
+              the bootstrap from refitting on more oracle data than the original calibration.
         """
         # Set seed for reproducibility
         random.seed(seed)
@@ -111,6 +120,7 @@ class BaseAblation:
         # Mask oracle labels if coverage < 1
         original_oracle_labels = {}
         n_oracle = len(dataset.samples)  # Default: all have oracle
+        oracle_prompt_ids: set = set()  # Track which prompts have oracle after masking
 
         if spec.oracle_coverage is not None and spec.oracle_coverage < 1.0:
             # Find samples with oracle labels (top-level field, not in metadata)
@@ -134,7 +144,19 @@ class BaseAblation:
 
             n_oracle = len(keep_indices)
 
-        return dataset, n_oracle, original_oracle_labels
+            # Collect prompt IDs that have oracle labels after masking
+            for i in keep_indices:
+                sample = dataset.samples[i]
+                if hasattr(sample, "prompt_id") and sample.prompt_id:
+                    oracle_prompt_ids.add(sample.prompt_id)
+        else:
+            # 100% oracle coverage - all samples with oracle_label are in the oracle slice
+            for sample in dataset.samples:
+                if sample.oracle_label is not None:
+                    if hasattr(sample, "prompt_id") and sample.prompt_id:
+                        oracle_prompt_ids.add(sample.prompt_id)
+
+        return dataset, n_oracle, original_oracle_labels, oracle_prompt_ids
 
     def create_estimator(
         self, spec: ExperimentSpec, sampler: PrecomputedSampler, cal_result: Any, seed: int = 42
@@ -159,6 +181,13 @@ class BaseAblation:
         oua = spec.extra.get("oua_jackknife", True) if spec.extra else True
         # Variance budget (rho) for SIMCal - default 1.0 means no variance increase
         var_cap = spec.extra.get("var_cap", 1.0) if spec.extra else 1.0
+        # Bootstrap inference parameters for Direct mode
+        # Default to cluster_robust for fast point estimates (accuracy experiments)
+        # Use "auto" or "bootstrap" only for UQ experiments (ablate_bootstrap_uq.py)
+        inference_method = spec.extra.get("inference_method", "cluster_robust") if spec.extra else "cluster_robust"
+        n_bootstrap = spec.extra.get("n_bootstrap", 2000) if spec.extra else 2000
+        # Use augmented estimator (AIPW-style debiasing) - ON by default
+        use_augmented_estimator = spec.extra.get("use_augmented_estimator", True) if spec.extra else True
 
         # Log parameter settings if needed
         # logger.info(f"Creating {spec.estimator} with use_iic={use_iic}, "
@@ -178,12 +207,16 @@ class BaseAblation:
                 reward_calibrator=cal_result.calibrator if cal_result else None,
                 run_diagnostics=True,
                 oua_jackknife=oua,
+                inference_method=inference_method,
+                n_bootstrap=n_bootstrap,
+                use_augmented_estimator=use_augmented_estimator,
             ),
             "naive-direct": lambda s: CalibratedDirectEstimator(
                 target_policies=list(s.target_policies),
                 reward_calibrator=None,  # Force no calibration
                 run_diagnostics=True,
                 oua_jackknife=False,  # No oracle uncertainty (no calibration)
+                inference_method="cluster_robust",  # Skip bootstrap to use raw judge scores
             ),
             "raw-ips": lambda s: CalibratedIPS(
                 s,
@@ -470,7 +503,7 @@ class BaseAblation:
 
         try:
             # Prepare data
-            dataset, n_oracle, original_oracle_labels = self.prepare_dataset(spec, seed)
+            dataset, n_oracle, original_oracle_labels, oracle_prompt_ids = self.prepare_dataset(spec, seed)
             result["n_samples"] = len(dataset.samples)
             result["n_oracle"] = n_oracle
             result["oracle_slice_size"] = (
@@ -631,6 +664,25 @@ class BaseAblation:
                                 else 10
                             )
 
+                            # CRITICAL FIX: Mask oracle labels in fresh_draws to match
+                            # the oracle slice used during calibration. This prevents
+                            # bootstrap from refitting on more oracle data than the
+                            # original calibration (which would lead to smaller SEs
+                            # and undercoverage).
+                            n_masked_oracle = 0
+                            for fd_sample in filtered_samples:
+                                if fd_sample.oracle_label is not None:
+                                    prompt_id = fd_sample.prompt_id if hasattr(fd_sample, "prompt_id") else None
+                                    if prompt_id and prompt_id not in oracle_prompt_ids:
+                                        fd_sample.oracle_label = None
+                                        n_masked_oracle += 1
+
+                            if n_masked_oracle > 0:
+                                logger.info(
+                                    f"Masked {n_masked_oracle} oracle labels in fresh_draws for {policy} "
+                                    f"to match calibration oracle slice ({len(oracle_prompt_ids)} prompts)"
+                                )
+
                             filtered_fresh_draws = FreshDrawDataset(
                                 samples=filtered_samples,
                                 target_policy=policy,  # Use the policy we're processing
@@ -652,6 +704,21 @@ class BaseAblation:
                             )
                         else:
                             # If no prompt IDs, use all fresh draws (fallback)
+                            # But still mask oracle labels to match calibration oracle slice
+                            n_masked_oracle = 0
+                            for fd_sample in all_fresh_draws.samples:
+                                if fd_sample.oracle_label is not None:
+                                    prompt_id = fd_sample.prompt_id if hasattr(fd_sample, "prompt_id") else None
+                                    if prompt_id and prompt_id not in oracle_prompt_ids:
+                                        fd_sample.oracle_label = None
+                                        n_masked_oracle += 1
+
+                            if n_masked_oracle > 0:
+                                logger.info(
+                                    f"Masked {n_masked_oracle} oracle labels in fresh_draws for {policy} "
+                                    f"to match calibration oracle slice ({len(oracle_prompt_ids)} prompts)"
+                                )
+
                             # Still compute covariates if needed
                             if covariate_names:
                                 from cje.data.fresh_draws import compute_response_covariates
@@ -820,6 +887,47 @@ class BaseAblation:
                     if all_m_maxs:
                         result["mc_diagnostics"]["M_max"] = max(all_m_maxs)
 
+                # Extract bootstrap UQ metrics from metadata
+                if "inference" in estimation_result.metadata:
+                    inf = estimation_result.metadata["inference"]
+                    result["uq_method"] = inf.get("method", None)
+                    result["n_bootstrap_valid"] = inf.get("n_bootstrap_valid", None)
+                    result["bootstrap_skip_rate"] = inf.get("skip_rate", None)
+                    result["bootstrap_coupled"] = inf.get("coupled", None)
+
+                # Also capture bootstrap CI if present
+                if "bootstrap_ci" in estimation_result.metadata:
+                    boot_ci = estimation_result.metadata["bootstrap_ci"]
+                    result["bootstrap_ci_method"] = boot_ci.get("method", None)
+
+                    # BCa diagnostics: extract z0 (bias correction) and acceleration
+                    if boot_ci.get("method") == "bca":
+                        z0 = boot_ci.get("z0")
+                        accel = boot_ci.get("acceleration")
+
+                        if z0 is not None:
+                            # Store z0 per policy for diagnosis
+                            result["bca_z0"] = {}
+                            for i, policy in enumerate(sampler.target_policies):
+                                if i < len(z0):
+                                    result["bca_z0"][policy] = float(z0[i])
+                            # Store mean absolute z0 as summary
+                            result["bca_z0_mean_abs"] = float(np.mean(np.abs(z0)))
+
+                        if accel is not None:
+                            # Store acceleration per policy
+                            result["bca_acceleration"] = {}
+                            for i, policy in enumerate(sampler.target_policies):
+                                if i < len(accel):
+                                    result["bca_acceleration"][policy] = float(accel[i])
+                            # Store mean absolute acceleration as summary
+                            result["bca_acceleration_mean_abs"] = float(np.mean(np.abs(accel)))
+
+            # Store UQ method from spec (requested value, not actual)
+            if spec.extra:
+                result["uq_method_requested"] = spec.extra.get("inference_method", "auto")
+                result["n_bootstrap_requested"] = spec.extra.get("n_bootstrap", None)
+
             # Compute diagnostics
             self.compute_diagnostics(estimator, result, len(dataset.samples))
 
@@ -848,12 +956,27 @@ class BaseAblation:
                 result["estimates"], oracle_truths
             )
 
-            # Mean CI width
+            # Mean CI width (excluding unhelpful policy)
             if result["confidence_intervals"]:
                 widths = [
-                    ci[1] - ci[0] for ci in result["confidence_intervals"].values()
+                    ci[1] - ci[0]
+                    for policy, ci in result["confidence_intervals"].items()
+                    if policy != "unhelpful"
                 ]
-                result["mean_ci_width"] = float(np.mean(widths))
+                result["mean_ci_width"] = float(np.mean(widths)) if widths else None
+
+            # Compute CI coverage (does the CI contain the oracle truth?)
+            # This is the primary metric for UQ evaluation
+            # Note: Excludes "unhelpful" policy due to calibration invariance violation
+            if result["confidence_intervals"] and oracle_truths:
+                for policy in result["confidence_intervals"]:
+                    if policy == "unhelpful":
+                        continue  # Skip - violates calibration invariance assumption
+                    if policy in oracle_truths:
+                        lower, upper = result["confidence_intervals"][policy]
+                        oracle = oracle_truths[policy]
+                        if np.isfinite(lower) and np.isfinite(upper) and np.isfinite(oracle):
+                            result["ci_covers_oracle"][policy] = bool(lower <= oracle <= upper)
 
             result["success"] = True
 

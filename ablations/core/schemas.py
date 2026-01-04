@@ -113,6 +113,13 @@ def create_result(spec: ExperimentSpec, seed: int) -> Dict[str, Any]:
         "n_samples": None,  # Actual number of samples used
         "n_oracle": None,  # Actual number of oracle labels
         # CF-bits metrics removed - feature no longer in library
+        # Bootstrap UQ metrics (for Direct mode)
+        "uq_method": None,  # Inference method: "cluster_robust", "bootstrap", "auto"
+        "n_bootstrap_requested": None,  # Requested number of bootstrap replicates
+        "n_bootstrap_valid": None,  # Actual valid bootstrap replicates
+        "bootstrap_skip_rate": None,  # Fraction of replicates needing retry
+        "bootstrap_coupled": None,  # Whether calibration/evaluation were coupled
+        "ci_covers_oracle": {},  # Policy -> bool: does 95% CI contain oracle truth?
     }
 
 

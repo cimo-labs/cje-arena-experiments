@@ -1,6 +1,6 @@
 # Large result files (exclude 11GB ablation outputs)
-ablations/results/
-ablations/tables/
+ablations/results/*
+!ablations/results/tables/
 ablations/.cache/
 outputs/
 

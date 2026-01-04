@@ -1,5 +1,6 @@
-# CJE library (pinned for reproducibility)
-cje-eval==0.2.5
+# CJE library - pinned for reproducibility
+# v0.2.10: bootstrap default, BCa removal, percentile CIs
+cje-eval==0.2.10
 
 # Core scientific computing (already in cje-eval, listed for clarity)
 numpy>=1.26

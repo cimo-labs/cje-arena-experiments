@@ -16,10 +16,11 @@ import numpy as np
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm import tqdm
 
-# Add ablations directory to path for local imports
+# Add parent directories to path
 import sys
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.append(str(Path(__file__).parent.parent))
+sys.path.append(str(Path(__file__).parent.parent.parent.parent))
 
 # Import configuration
 from config import (
