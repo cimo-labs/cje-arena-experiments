@@ -214,11 +214,9 @@ After running experiments, results are saved to:
 
 ## Known Issues
 
-### Log Probability Issues
-- **~1% null logprobs**: API returns mathematically impossible positive values for some samples
-- **~18% suspicious values**: Long responses have unrealistically high log probabilities
-- **Root cause**: Fireworks API bugs with teacher forcing
-- **Solution**: Use multi-pass generation to identify and document non-determinism
+### Teacher Forcing Filtering
+- **0.8% filtered** (39/5000 prompts): 11 due to base-policy TF conformance failures, 28 due to missing target-policy logprobs
+- Practitioners should expect some data loss from TF gaps; filtering is logged for reproducibility
 
 ### Multi-Pass Generation
 Generate multiple passes to study API non-determinism and improve data quality:
