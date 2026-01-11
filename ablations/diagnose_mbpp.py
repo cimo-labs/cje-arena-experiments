@@ -35,6 +35,7 @@ def load_response_data(policy: str) -> pd.DataFrame:
                 'prompt_id': data['prompt_id'],
                 'oracle_label': data['metadata']['oracle_label'],
                 'judge_score': data['metadata']['judge_score'],
+                'binary_judge': data['metadata'].get('binary_judge'),  # May be None if not yet collected
                 'response_length': data['metadata'].get('response_length', len(data['response'])),
                 'policy': policy
             })
@@ -340,6 +341,132 @@ def analysis_3_support_check(df: pd.DataFrame) -> Dict:
     return results
 
 
+def analysis_4_binary_transport_audit(df: pd.DataFrame) -> Dict:
+    """
+    Compute confusion-matrix transport audit for binary judge.
+
+    This is the binary analog of analysis_2. Tests whether P(Ẑ|Y) is stable
+    across policies, which is required for Rogan-Gladen adjustment to transfer.
+    """
+    print("\n" + "="*70)
+    print("ANALYSIS 4: BINARY TRANSPORT AUDIT (Confusion Matrix Stability)")
+    print("="*70)
+
+    # Check if binary judge data exists
+    sample_record = df.iloc[0]
+    if 'binary_judge' not in df.columns:
+        print("\nNo binary judge data found. Run add_binary_judge.py first.")
+        return {}
+
+    # Filter to records with binary judge
+    df_binary = df[df['binary_judge'].notna()].copy()
+
+    if len(df_binary) == 0:
+        print("\nNo binary judge data found.")
+        return {}
+
+    print(f"\nFound {len(df_binary)} samples with binary judge data")
+
+    # Compute confusion stats for base
+    base_df = df_binary[df_binary['policy'] == 'base']
+    y_base = base_df['oracle_label'].values
+    z_base = base_df['binary_judge'].values.astype(int)
+
+    # Sensitivity and specificity for base
+    pos_mask = (y_base == 1)
+    neg_mask = (y_base == 0)
+
+    se_base = z_base[pos_mask].mean() if pos_mask.sum() > 0 else np.nan
+    sp_base = (1 - z_base[neg_mask]).mean() if neg_mask.sum() > 0 else np.nan
+    j_base = se_base + sp_base - 1 if not np.isnan(se_base) and not np.isnan(sp_base) else np.nan
+
+    print(f"\nBase policy confusion matrix:")
+    print(f"  Sensitivity (Se): {se_base:.1%} (P(Ẑ=YES | Y=pass))")
+    print(f"  Specificity (Sp): {sp_base:.1%} (P(Ẑ=NO | Y=fail))")
+    print(f"  Youden's J:       {j_base:.3f}")
+    print(f"  N positive:       {pos_mask.sum()}")
+    print(f"  N negative:       {neg_mask.sum()}")
+
+    if j_base <= 0.05:
+        print(f"\n⚠ WARNING: Youden's J ({j_base:.3f}) <= 0.05")
+        print("  Binary judge is near-random. Rogan-Gladen adjustment invalid.")
+
+    print("\n" + "-"*70)
+    print("CONFUSION MATRIX STABILITY PER POLICY")
+    print("-"*70)
+
+    results = {}
+    for policy in df_binary['policy'].unique():
+        if policy == 'base':
+            continue
+
+        policy_df = df_binary[df_binary['policy'] == policy]
+        y_policy = policy_df['oracle_label'].values
+        z_policy = policy_df['binary_judge'].values.astype(int)
+
+        pos_mask_p = (y_policy == 1)
+        neg_mask_p = (y_policy == 0)
+
+        se_policy = z_policy[pos_mask_p].mean() if pos_mask_p.sum() > 0 else np.nan
+        sp_policy = (1 - z_policy[neg_mask_p]).mean() if neg_mask_p.sum() > 0 else np.nan
+
+        # Two-proportion z-tests
+        # Test Se equality
+        if pos_mask.sum() > 0 and pos_mask_p.sum() > 0:
+            n1, n2 = pos_mask.sum(), pos_mask_p.sum()
+            se_pooled = (se_base * n1 + se_policy * n2) / (n1 + n2)
+            se_diff = se_base - se_policy
+            se_se = np.sqrt(se_pooled * (1 - se_pooled) * (1/n1 + 1/n2))
+            z_se = se_diff / se_se if se_se > 0 else 0
+            p_se = 2 * (1 - stats.t.cdf(abs(z_se), min(n1, n2) - 1))
+        else:
+            p_se = 1.0
+
+        # Test Sp equality
+        if neg_mask.sum() > 0 and neg_mask_p.sum() > 0:
+            n1, n2 = neg_mask.sum(), neg_mask_p.sum()
+            sp_pooled = (sp_base * n1 + sp_policy * n2) / (n1 + n2)
+            sp_diff = sp_base - sp_policy
+            sp_se = np.sqrt(sp_pooled * (1 - sp_pooled) * (1/n1 + 1/n2))
+            z_sp = sp_diff / sp_se if sp_se > 0 else 0
+            p_sp = 2 * (1 - stats.t.cdf(abs(z_sp), min(n1, n2) - 1))
+        else:
+            p_sp = 1.0
+
+        # Bonferroni correction
+        p_combined = min(1.0, 2 * min(p_se, p_sp))
+        passes_audit = p_combined >= 0.05
+
+        results[policy] = {
+            'sensitivity': se_policy,
+            'specificity': sp_policy,
+            'delta_se': se_policy - se_base,
+            'delta_sp': sp_policy - sp_base,
+            'p_se': p_se,
+            'p_sp': p_sp,
+            'p_combined': p_combined,
+            'passes_audit': passes_audit,
+        }
+
+        status = "✓ PASS" if passes_audit else "✗ FAIL"
+        print(f"\n{policy}:")
+        print(f"  Sensitivity: {se_policy:.1%} (Δ = {se_policy - se_base:+.1%})")
+        print(f"  Specificity: {sp_policy:.1%} (Δ = {sp_policy - sp_base:+.1%})")
+        print(f"  p(Se equal): {p_se:.4f}")
+        print(f"  p(Sp equal): {p_sp:.4f}")
+        print(f"  p(combined): {p_combined:.4f}")
+        print(f"  Binary transport: {status}")
+
+    # Summary comparison with score-based transport
+    print("\n" + "-"*70)
+    print("TRANSPORT AUDIT COMPARISON: Score vs Binary")
+    print("-"*70)
+    print("  Policy      | Score Transport | Binary Transport")
+    print("  " + "-"*50)
+
+    return results
+
+
 def check_judge_policy_confound(df: pd.DataFrame):
     """
     Flag that gpt-4o-mini is both judge and policy (mini).
@@ -379,6 +506,7 @@ def generate_diagnostic_report():
     tie_results = analysis_1_tie_aware_ranking(df)
     transport_results = analysis_2_transport_audit(df)
     support_results = analysis_3_support_check(df)
+    binary_transport_results = analysis_4_binary_transport_audit(df)
 
     # Flag confound
     check_judge_policy_confound(df)
@@ -415,7 +543,8 @@ KEY FINDINGS:
     return {
         'tie_analysis': tie_results,
         'transport_audit': transport_results,
-        'support_check': support_results
+        'support_check': support_results,
+        'binary_transport_audit': binary_transport_results,
     }
 
 

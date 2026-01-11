@@ -319,12 +319,19 @@ Demonstrate transport audit works with limited labels:
 ```
 ablations/results_mbpp/
 ├── all_experiments.jsonl    # 3,750 experiment results
+├── binary_baseline.jsonl    # Binary comparison results (after collection)
 ├── REPORT.md                # This report
 
 ablations/
-├── diagnose_mbpp.py         # Diagnostic analysis
+├── diagnose_mbpp.py         # Diagnostic analysis (score + binary transport)
 ├── config_mbpp.py           # Experiment configuration
-├── run_mbpp.py              # Ablation runner
+├── run_mbpp.py              # Ablation runner (continuous)
+├── binary_baseline.py       # Rogan-Gladen estimator + confusion audit
+├── run_binary_baseline.py   # Binary comparison experiments
+
+data_generation_mbpp/
+├── add_judge_scores.py      # Collect continuous judge scores
+├── add_binary_judge.py      # Collect binary judge scores
 
 data_mbpp/
 ├── mbpp_dataset.jsonl       # Base policy (1,285 rows)
@@ -337,6 +344,71 @@ cd ablations
 python run_mbpp.py --workers=8    # ~4 minutes
 python diagnose_mbpp.py           # Diagnostics
 ```
+
+---
+
+## 13. Binary Baseline Comparison (Pending)
+
+This section compares continuous CJE calibration against binary misclassification adjustment (Lee et al. / Rogan-Gladen framework).
+
+### 13.1 Methodology
+
+| Method | Judge Output | Calibration | Transport Audit |
+|--------|--------------|-------------|-----------------|
+| naive-direct | Continuous S ∈ [0,1] | None | N/A |
+| direct | Continuous S ∈ [0,1] | Isotonic f(S) → Y | Mean residual E[Y - f(S)] |
+| binary-naive | Binary Ẑ ∈ {0,1} | None | N/A |
+| binary-adjusted | Binary Ẑ ∈ {0,1} | Rogan-Gladen | Confusion matrix stability |
+
+**Rogan-Gladen adjustment:**
+```
+θ̂ = (p̂ + Sp - 1) / (Se + Sp - 1)
+
+where:
+  p̂ = observed proportion of YES predictions
+  Se = sensitivity = P(Ẑ=1|Y=1)
+  Sp = specificity = P(Ẑ=0|Y=0)
+```
+
+**Validity constraint:** Youden's J = Se + Sp - 1 must be > 0 for adjustment to be valid.
+
+### 13.2 Data Collection Status
+
+- [ ] Collect binary judgments (~$10-15 API cost)
+- [ ] Run binary baseline experiments
+- [ ] Generate comparison tables
+
+**To collect binary judge data:**
+```bash
+cd data_generation_mbpp
+python add_binary_judge.py
+```
+
+**To run binary comparison:**
+```bash
+cd ablations
+python run_binary_baseline.py
+```
+
+### 13.3 Expected Results (Placeholder)
+
+| Estimator | RMSE (transport-valid) | Notes |
+|-----------|------------------------|-------|
+| naive-direct | 0.048 | Continuous, uncalibrated |
+| direct | 0.029 | Continuous, isotonic |
+| binary-naive | TBD | Binary, uncalibrated |
+| binary-adjusted | TBD | Binary, Rogan-Gladen |
+
+### 13.4 Transport Audit Comparison (Placeholder)
+
+| Policy | Score Transport | Binary Transport |
+|--------|-----------------|------------------|
+| enhanced | ✓ PASS | TBD |
+| terse | ✓ PASS | TBD |
+| mini | ✗ FAIL | TBD |
+| unhelpful | ✗ FAIL | TBD |
+
+**Hypothesis:** If mini fails score transport due to judge=policy confound, it should also fail binary transport (inflated sensitivity for mini outputs).
 
 ---
 
