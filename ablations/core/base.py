@@ -610,6 +610,9 @@ class BaseAblation:
                 oua = (
                     spec.extra.get("oua_jackknife", True) if spec.extra else True
                 )
+                calibration_policy = (
+                    spec.extra.get("calibration_policy", None) if spec.extra else None
+                )
 
                 if spec.estimator == "naive-direct":
                     # Naive-direct: no calibration
@@ -630,6 +633,7 @@ class BaseAblation:
                         inference_method=inference_method,
                         n_bootstrap=n_bootstrap,
                         use_augmented_estimator=use_augmented_estimator,
+                        calibration_policy=calibration_policy,  # Transport-aware bootstrap
                     )
 
                 # Create a minimal dummy sampler just for compatibility with code that references it
@@ -713,24 +717,10 @@ class BaseAblation:
                                 else 10
                             )
 
-                            # CRITICAL FIX: Mask oracle labels in fresh_draws to match
-                            # the oracle slice used during calibration. This prevents
-                            # bootstrap from refitting on more oracle data than the
-                            # original calibration (which would lead to smaller SEs
-                            # and undercoverage).
-                            n_masked_oracle = 0
-                            for fd_sample in filtered_samples:
-                                if fd_sample.oracle_label is not None:
-                                    prompt_id = fd_sample.prompt_id if hasattr(fd_sample, "prompt_id") else None
-                                    if prompt_id and prompt_id not in oracle_prompt_ids:
-                                        fd_sample.oracle_label = None
-                                        n_masked_oracle += 1
-
-                            if n_masked_oracle > 0:
-                                logger.info(
-                                    f"Masked {n_masked_oracle} oracle labels in fresh_draws for {policy} "
-                                    f"to match calibration oracle slice ({len(oracle_prompt_ids)} prompts)"
-                                )
+                            # NOTE: Oracle masking removed. With calibration_policy_idx
+                            # in bootstrap, we keep all oracle labels. The calibrator
+                            # only fits on calibration_policy oracle, but θ̂_aug uses
+                            # all oracle for residual corrections (transport bias fix).
 
                             filtered_fresh_draws = FreshDrawDataset(
                                 samples=filtered_samples,
@@ -753,22 +743,9 @@ class BaseAblation:
                             )
                         else:
                             # If no prompt IDs, use all fresh draws (fallback)
-                            # But still mask oracle labels to match calibration oracle slice
-                            n_masked_oracle = 0
-                            for fd_sample in all_fresh_draws.samples:
-                                if fd_sample.oracle_label is not None:
-                                    prompt_id = fd_sample.prompt_id if hasattr(fd_sample, "prompt_id") else None
-                                    if prompt_id and prompt_id not in oracle_prompt_ids:
-                                        fd_sample.oracle_label = None
-                                        n_masked_oracle += 1
+                            # NOTE: Oracle masking removed (same as above)
 
-                            if n_masked_oracle > 0:
-                                logger.info(
-                                    f"Masked {n_masked_oracle} oracle labels in fresh_draws for {policy} "
-                                    f"to match calibration oracle slice ({len(oracle_prompt_ids)} prompts)"
-                                )
-
-                            # Still compute covariates if needed
+                            # Compute covariates if needed
                             if covariate_names:
                                 from cje.data.fresh_draws import compute_response_covariates
                                 all_fresh_draws = compute_response_covariates(
