@@ -587,8 +587,57 @@ class BaseAblation:
                     result["reward_calibration_used"] = reward_calibration_mode
 
             # Create sampler and estimator
-            sampler = PrecomputedSampler(calibrated_dataset)
-            estimator = self.create_estimator(spec, sampler, cal_result, seed)
+            # For Direct mode, we don't need PrecomputedSampler (no logprobs required)
+            if spec.estimator in ["direct", "naive-direct"]:
+                # Direct mode: create estimator directly, it will use fresh draws
+                # CalibratedDirectEstimator creates its own dummy sampler internally
+                target_policies = list(calibrated_dataset.target_policies)
+
+                # Determine inference parameters
+                inference_method = (
+                    spec.extra.get("inference_method", "bootstrap")
+                    if spec.extra
+                    else "bootstrap"
+                )
+                n_bootstrap = (
+                    spec.extra.get("n_bootstrap", 2000) if spec.extra else 2000
+                )
+                use_augmented_estimator = (
+                    spec.extra.get("use_augmented_estimator", True)
+                    if spec.extra
+                    else True
+                )
+                oua = (
+                    spec.extra.get("oua_jackknife", True) if spec.extra else True
+                )
+
+                if spec.estimator == "naive-direct":
+                    # Naive-direct: no calibration
+                    estimator = CalibratedDirectEstimator(
+                        target_policies=target_policies,
+                        reward_calibrator=None,  # No calibration
+                        run_diagnostics=True,
+                        oua_jackknife=False,  # No OUA without calibration
+                        inference_method="cluster_robust",
+                    )
+                else:
+                    # Direct: use calibrator
+                    estimator = CalibratedDirectEstimator(
+                        target_policies=target_policies,
+                        reward_calibrator=cal_result.calibrator if cal_result else None,
+                        run_diagnostics=True,
+                        oua_jackknife=oua,
+                        inference_method=inference_method,
+                        n_bootstrap=n_bootstrap,
+                        use_augmented_estimator=use_augmented_estimator,
+                    )
+
+                # Create a minimal dummy sampler just for compatibility with code that references it
+                sampler = type('DummySampler', (), {'target_policies': target_policies})()
+            else:
+                # IPS/DR modes: require logprobs
+                sampler = PrecomputedSampler(calibrated_dataset)
+                estimator = self.create_estimator(spec, sampler, cal_result, seed)
 
             # Add fresh draws for DR methods and Direct method
             if spec.estimator in [
