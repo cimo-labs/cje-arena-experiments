@@ -347,7 +347,7 @@ python diagnose_mbpp.py           # Diagnostics
 
 ---
 
-## 13. Binary Baseline Comparison (Pending)
+## 13. Binary Baseline Comparison
 
 This section compares continuous CJE calibration against binary misclassification adjustment (Lee et al. / Rogan-Gladen framework).
 
@@ -372,43 +372,88 @@ where:
 
 **Validity constraint:** Youden's J = Se + Sp - 1 must be > 0 for adjustment to be valid.
 
-### 13.2 Data Collection Status
+### 13.2 Binary Judge Characteristics
 
-- [ ] Collect binary judgments (~$10-15 API cost)
-- [ ] Run binary baseline experiments
-- [ ] Generate comparison tables
+| Metric | Value | Interpretation |
+|--------|-------|----------------|
+| Sensitivity (Se) | 70.3% | P(YES \| code passes) |
+| Specificity (Sp) | 35.2% | P(NO \| code fails) |
+| **Youden's J** | **0.054** | **Borderline invalid** |
+| N positive | 1,123 | Samples where code passes |
+| N negative | 162 | Samples where code fails |
 
-**To collect binary judge data:**
-```bash
-cd data_generation_mbpp
-python add_binary_judge.py
-```
+⚠️ **Critical issue:** The binary judge has very low specificity (35.2%), meaning it says YES even when code fails 65% of the time. Youden's J = 0.054 is at the validity threshold for Rogan-Gladen adjustment.
 
-**To run binary comparison:**
-```bash
-cd ablations
-python run_binary_baseline.py
-```
+### 13.3 Binary Judge YES Rates
 
-### 13.3 Expected Results (Placeholder)
+| Policy | Binary YES | Continuous Mean | Oracle Pass |
+|--------|------------|-----------------|-------------|
+| base | 69.6% | 0.843 | 87.4% |
+| enhanced | 71.0% | 0.839 | 87.2% |
+| mini | 70.7% | 0.832 | 80.9% |
+| terse | 64.6% | 0.815 | 87.4% |
+| unhelpful | 36.4% | 0.681 | 56.0% |
 
-| Estimator | RMSE (transport-valid) | Notes |
-|-----------|------------------------|-------|
-| naive-direct | 0.048 | Continuous, uncalibrated |
-| direct | 0.029 | Continuous, isotonic |
-| binary-naive | TBD | Binary, uncalibrated |
-| binary-adjusted | TBD | Binary, Rogan-Gladen |
+### 13.4 RMSE Comparison: Continuous vs Binary
 
-### 13.4 Transport Audit Comparison (Placeholder)
+| Estimator | RMSE | vs naive-direct |
+|-----------|------|-----------------|
+| **naive-direct** | 0.048 | — |
+| **direct** | **0.029** | **-39%** |
+| binary-naive (enhanced) | 0.161 | +235% |
+| binary-naive (terse) | 0.227 | +373% |
+| binary-adjusted (enhanced) | 0.203 | +323% |
+| binary-adjusted (terse) | 0.508 | +958% |
 
-| Policy | Score Transport | Binary Transport |
-|--------|-----------------|------------------|
-| enhanced | ✓ PASS | TBD |
-| terse | ✓ PASS | TBD |
-| mini | ✗ FAIL | TBD |
-| unhelpful | ✗ FAIL | TBD |
+**Key finding:** Binary calibration (Rogan-Gladen) **increases** RMSE rather than decreasing it. This is because:
+1. Low specificity (35.2%) means J ≈ 0.05
+2. Division by J ≈ 0.05 amplifies small errors
+3. The calibration is unstable when the binary judge lacks discriminative power
 
-**Hypothesis:** If mini fails score transport due to judge=policy confound, it should also fail binary transport (inflated sensitivity for mini outputs).
+### 13.5 Transport Audit Comparison
+
+| Policy | Score Transport | Binary Transport | Agreement |
+|--------|-----------------|------------------|-----------|
+| enhanced | ✓ PASS | ✓ PASS | ✓ |
+| terse | ✓ PASS | ✗ FAIL | ✗ |
+| mini | ✗ FAIL | ✗ FAIL | ✓ |
+| unhelpful | ✗ FAIL | ✗ FAIL | ✓ |
+
+**Observations:**
+- mini and unhelpful fail both audits (expected)
+- terse fails binary transport but passes score transport
+- The binary audit is more conservative due to low base specificity
+
+### 13.6 Why Binary Calibration Fails Here
+
+The Rogan-Gladen formula θ̂ = (p̂ + Sp - 1) / J amplifies errors when J is small:
+
+| Youden's J | Error Amplification |
+|------------|---------------------|
+| 0.50 | 2x |
+| 0.20 | 5x |
+| 0.10 | 10x |
+| **0.054** | **18.5x** |
+
+With J = 0.054, a 1pp error in p̂ becomes an 18.5pp error in θ̂.
+
+### 13.7 Conclusions
+
+1. **Continuous calibration wins decisively** when the judge provides continuous scores
+2. **Binary calibration fails** because the binary judge has poor specificity
+3. **The "do we need continuous scores?" question has a clear answer: YES**
+4. **Diagnostic frameworks matter:** Both continuous and binary methods need transport audits
+
+### 13.8 Methodological Recommendation
+
+When choosing between continuous and binary calibration:
+
+| Condition | Recommendation |
+|-----------|----------------|
+| Youden's J > 0.3 | Binary may work |
+| Youden's J < 0.1 | Use continuous or refuse |
+| Continuous available | Prefer continuous |
+| Only binary available | Check J before using Rogan-Gladen |
 
 ---
 
