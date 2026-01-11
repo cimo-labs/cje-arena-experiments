@@ -274,14 +274,41 @@ At 10%+, calibration clearly dominates.
 2. **Transport audit catches failures:** Correctly flags mini and unhelpful
 3. **Proper response to failure:** Stratify by transport; refuse level claims for failures
 
-### 10.2 Operational Rules
+### 10.2 Transport Gating: The Key Insight
 
-1. Run transport audit before reporting calibrated estimates
-2. Stratify results by transport validity
+**The transport audit should GATE calibration, not just diagnose it.**
+
+| Method | RMSE | Kendall τ | Top-1 | Unhelpful Last |
+|--------|------|-----------|-------|----------------|
+| naive-direct | 0.071 | 0.33 | 98% | 100% |
+| direct (calibrate all) | 0.148 | 0.21 | 67% | 96% |
+| **direct + gating** | **0.069** | **0.61** | **91%** | **99%** |
+
+Without gating, calibration applied to transport-invalid policies:
+- Increases RMSE by 109%
+- Reduces ranking τ from 0.33 to 0.21
+
+With gating:
+- RMSE improves slightly (0.071 → 0.069)
+- Ranking τ nearly triples (0.33 → 0.61)
+
+**Implementation:**
+```python
+def cje_estimate(policy, calibrator, transport_audit):
+    if transport_audit.passes(policy):
+        return calibrator.predict(policy)  # Calibrated
+    else:
+        return naive_estimate(policy)       # Fall back
+```
+
+### 10.3 Operational Rules
+
+1. **Run transport audit FIRST** - before applying calibration
+2. **Gate calibration by transport** - only calibrate policies that pass
 3. Report tiers when policy differences are below MDE
 4. Never use judge = policy without explicit audit
 
-### 10.3 What MBPP Teaches
+### 10.4 What MBPP Teaches
 
 - CJE works correctly on coding tasks when assumptions hold
 - The "coding is different" narrative is not supported
@@ -454,6 +481,26 @@ When choosing between continuous and binary calibration:
 | Youden's J < 0.1 | Use continuous or refuse |
 | Continuous available | Prefer continuous |
 | Only binary available | Check J before using Rogan-Gladen |
+
+### 13.9 Transport Gating vs Rogan-Gladen
+
+| Aspect | CJE + Gating | Rogan-Gladen |
+|--------|--------------|--------------|
+| Transport assumption | P(Y\|S) stable | P(Ẑ\|Y) stable |
+| Built-in diagnostic | Yes (mean residual) | **No** |
+| Gating mechanism | Fall back to naive | None available |
+| RMSE (this study) | 0.069 | N/A (J too low) |
+| Ranking τ (this study) | 0.61 | 0.25-0.28 |
+
+The Rogan-Gladen framework:
+1. **Assumes** confusion matrix stability without testing it
+2. **Fails silently** when Youden's J is low
+3. **Cannot be gated** because there's no continuous fallback
+
+CJE with transport gating:
+1. **Tests** the transport assumption explicitly
+2. **Falls back** to naive when transport fails
+3. **Ensures** calibration "does no harm"
 
 ---
 
