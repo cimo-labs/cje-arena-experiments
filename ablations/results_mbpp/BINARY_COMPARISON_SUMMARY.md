@@ -91,6 +91,47 @@ The binary audit is more conservative (fails terse) because the low base specifi
 
 ---
 
+## Ranking Accuracy
+
+Level estimation aside, how well do the methods rank policies?
+
+| Method | Kendall τ | Top-1* | Unhelpful Last | Mini Separated |
+|--------|-----------|--------|----------------|----------------|
+| Binary naive | 0.25 | 0% | 100% | 0% |
+| Binary adjusted | 0.28 | 0% | 100% | 0% |
+| Continuous naive | 0.33 | 98% | 100% | 0% |
+| Continuous direct | 0.21 | 67% | 96% | 1% |
+
+*Top-1 = correctly identifies terse OR enhanced as best (they're a statistical tie)
+
+### Key Observations
+
+1. **All methods rank unhelpful last** - the 31pp gap is easily detectable
+2. **None reliably separate mini** from top tier (6.5pp gap ≈ MDE)
+3. **Binary always ranks: enhanced > mini > terse > unhelpful**
+4. **Calibrated continuous has transport failures** - 4% rank unhelpful NOT last
+
+### Most Common Rankings
+
+```
+Binary (both):        enhanced > mini > terse > unhelpful (75-84%)
+Continuous naive:     enhanced > mini > terse > unhelpful (98%)
+Continuous direct:    enhanced > mini > terse > unhelpful (66%)
+                      mini > enhanced > terse > unhelpful (28%)
+```
+
+### Why Calibrated Continuous Has Lower Ranking Accuracy
+
+The calibrated method (direct) applies corrections to transport-invalid policies:
+- mini: Calibration pushes estimate UP (wrong direction)
+- unhelpful: Calibration pushes estimate UP significantly
+
+This inflates estimates for policies that should rank lower, hurting ranking accuracy.
+
+**Takeaway:** For ranking, use naive estimates OR stratify by transport validity.
+
+---
+
 ## Files
 
 - `binary_baseline.jsonl` - 1,250 experiment results
