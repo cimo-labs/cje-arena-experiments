@@ -24,7 +24,8 @@ EXPERIMENTS_PREFERENCES = {
     "oracle_coverages": [0.01, 0.02, 0.05, 0.10, 0.25],
     # Weight calibration not used for Direct mode
     "use_weight_calibration": [False],
-    # Covariates off by default for preferences (no obvious response covariate)
+    # Covariates tested but too slow with bootstrap (each replicate re-fits calibrator)
+    # Two-stage calibration + 500 bootstrap = ~52 hours. Not worth marginal improvement.
     "use_covariates": [False],
     # Reward calibration mode
     "reward_calibration_mode": "monotone",

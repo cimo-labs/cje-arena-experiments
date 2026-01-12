@@ -537,6 +537,10 @@ class BaseAblation:
                     else "monotone"
                 )
 
+                # Override to "auto" when covariates are used (monotone doesn't support covariates)
+                if use_covariates and reward_calibration_mode == "monotone":
+                    reward_calibration_mode = "auto"
+
                 calibrated_dataset, cal_result = calibrate_dataset(
                     dataset,
                     judge_field="judge_score",

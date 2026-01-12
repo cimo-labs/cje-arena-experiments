@@ -1,0 +1,33 @@
+{
+  "n_experiments": 450,
+  "policy_stats": {
+    "terse": {
+      "naive_rmse": 0.062113393445376794,
+      "naive_bias": 0.061747756964367004,
+      "adjusted_rmse": 0.16501800452839938,
+      "mean_youden_j": 0.271518615122905,
+      "coverage_95ci": 0.9886363636363636,
+      "n_coverage": 440
+    },
+    "base": {
+      "naive_rmse": 0.022755758678070462,
+      "naive_bias": 0.021761175044965542,
+      "adjusted_rmse": 0.07805502586136598,
+      "mean_youden_j": 0.5943624376178208,
+      "coverage_95ci": 0.9488888888888889,
+      "n_coverage": 450
+    },
+    "verbose": {
+      "naive_rmse": 0.04179444581405187,
+      "naive_bias": 0.04123836364726001,
+      "adjusted_rmse": 0.09342308351845797,
+      "mean_youden_j": 0.552930239811055,
+      "coverage_95ci": 0.9711111111111111,
+      "n_coverage": 450
+    }
+  },
+  "overall_stats": {
+    "coverage_95ci": 0.9694029850746269,
+    "n_coverage": 1340
+  }
+}

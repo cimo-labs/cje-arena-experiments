@@ -1,0 +1,47 @@
+{
+  "description": "Expected metrics for Arena preferences ablation (with tolerances for seed variation)",
+  "generated_from": "450 binary + 900 continuous experiments, 30 seeds each",
+
+  "continuous_experiments": {
+    "count": 900,
+    "estimators": ["naive-direct", "direct"]
+  },
+
+  "binary_experiments": {
+    "count": 450,
+    "methods": ["binary-naive", "binary-adjusted"]
+  },
+
+  "cje_direct": {
+    "rmse": {"value": 0.0043, "tolerance": 0.002},
+    "coverage_95ci": {"value": 0.964, "tolerance": 0.03},
+    "ci_half_width": {"value": 0.015, "tolerance": 0.005}
+  },
+
+  "naive_direct": {
+    "rmse": {"value": 0.0707, "tolerance": 0.005},
+    "coverage_95ci": {"value": 0.0, "tolerance": 0.01}
+  },
+
+  "rogan_gladen": {
+    "rmse_base": {"value": 0.078, "tolerance": 0.02},
+    "rmse_verbose": {"value": 0.093, "tolerance": 0.02},
+    "rmse_terse": {"value": 0.165, "tolerance": 0.03},
+    "coverage_95ci": {"value": 0.969, "tolerance": 0.03},
+    "ci_half_width": {"value": 0.172, "tolerance": 0.05}
+  },
+
+  "youden_j": {
+    "base": {"value": 0.594, "tolerance": 0.05},
+    "verbose": {"value": 0.553, "tolerance": 0.05},
+    "terse": {"value": 0.272, "tolerance": 0.05},
+    "mean": {"value": 0.473, "tolerance": 0.05}
+  },
+
+  "key_claims": {
+    "cje_beats_rogan_gladen_rmse_percent": 95,
+    "cje_precision_advantage_multiplier": 11,
+    "both_have_valid_uq": true,
+    "comparison_is_fair": "Same oracle budget, same experimental grid"
+  }
+}

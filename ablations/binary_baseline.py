@@ -189,6 +189,71 @@ def rogan_gladen_variance(
     return var_theta
 
 
+def lee_et_al_confidence_interval(
+    p: float,
+    q0: float,
+    q1: float,
+    n: int,
+    m0: int,
+    m1: int,
+    alpha: float = 0.05,
+) -> Tuple[float, float]:
+    """Compute Lee et al. (2026) confidence interval for Rogan-Gladen estimator.
+
+    This implements Eq. 6 from "How to Correctly Report LLM-as-a-Judge Evaluations"
+    with Agresti-Coull adjustment and bias correction term.
+
+    Args:
+        p: Observed positive rate in test set
+        q0: Specificity (true negative rate) from calibration set
+        q1: Sensitivity (true positive rate) from calibration set
+        n: Test set size
+        m0: Number of negatives in calibration set
+        m1: Number of positives in calibration set
+        alpha: Significance level (default 0.05 for 95% CI)
+
+    Returns:
+        Tuple of (lower_bound, upper_bound) for 1-alpha confidence interval
+    """
+    z = stats.norm.ppf(1 - alpha / 2)
+
+    # Agresti-Coull adjustment
+    p_adj = (n * p + z**2 / 2) / (n + z**2)
+    q0_adj = (m0 * q0 + 1) / (m0 + 2)
+    q1_adj = (m1 * q1 + 1) / (m1 + 2)
+    n_adj = n + z**2
+    m0_adj = m0 + 2
+    m1_adj = m1 + 2
+
+    # Check validity (Youden's J must be positive)
+    j_adj = q0_adj + q1_adj - 1
+    if j_adj <= 0:
+        return np.nan, np.nan
+
+    # Adjusted estimate
+    theta = (p_adj + q0_adj - 1) / j_adj
+
+    # Bias correction term (Eq. 6)
+    dth = 2 * z**2 * (-(1 - theta) * q0_adj * (1 - q0_adj) / m0_adj
+                      + theta * q1_adj * (1 - q1_adj) / m1_adj)
+
+    # Standard error (accounts for both test and calibration uncertainty)
+    var_p = p_adj * (1 - p_adj) / n_adj
+    var_q0 = (1 - theta)**2 * q0_adj * (1 - q0_adj) / m0_adj
+    var_q1 = theta**2 * q1_adj * (1 - q1_adj) / m1_adj
+    se = np.sqrt(var_p + var_q0 + var_q1) / j_adj
+
+    # Confidence interval with bias correction
+    lower = theta + dth - z * se
+    upper = theta + dth + z * se
+
+    # Clip to [0, 1]
+    lower = max(0.0, min(1.0, lower))
+    upper = max(0.0, min(1.0, upper))
+
+    return lower, upper
+
+
 def binary_naive_estimate(
     z_binary: np.ndarray,
     cluster_ids: Optional[np.ndarray] = None,
