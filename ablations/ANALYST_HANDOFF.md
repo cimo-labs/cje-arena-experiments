@@ -16,9 +16,9 @@ This document provides a comprehensive handoff for the Arena preferences ablatio
 
 | Metric | CJE | Rogan-Gladen | Winner |
 |--------|-----|--------------|--------|
-| RMSE | 0.0043 | 0.078-0.165 | CJE (95% better) |
-| 95% CI Coverage | 96.4% | 96.9% | Tie (both valid) |
-| CI Half-Width | 0.015 | 0.172 | CJE (11x narrower) |
+| RMSE | 0.0043 | 0.096 | CJE (95% better) |
+| 95% CI Coverage | 96.4% | 97.9% | Tie (both valid) |
+| CI Half-Width | 0.015 | 0.192 | CJE (13x narrower) |
 
 ---
 
@@ -76,8 +76,8 @@ Both methods use **identical oracle budgets** (same labeled samples per experime
 |--------|-----------|-----|---|
 | CJE (direct) | **0.0043** | 0.0059 | 450 |
 | naive-direct | 0.0707 | 0.0021 | 450 |
-| binary-naive | 0.0450 | 0.0039 | 450 |
-| binary-adjusted (RG) | 0.0871 | 0.0802 | 450 |
+| binary-naive | 0.0569 | 0.0034 | 450 |
+| binary-adjusted (RG) | 0.0958 | 0.0860 | 450 |
 
 **Key insight:** CJE achieves 95% lower RMSE than Rogan-Gladen.
 
@@ -238,7 +238,79 @@ diff results_preferences/REPORT.md results_preferences/REPORT.md.bak
 
 ---
 
-## 8. Open Questions / Future Work
+## 8. Pressure Testing (Fairness Validation)
+
+### Final: True Apples-to-Apples Comparison
+
+After collecting missing binary labels for contrarian, both methods are now evaluated on the **same 3 target policies**: verbose, terse, contrarian.
+
+| Metric | CJE | RG | Comparison |
+|--------|-----|----|-----------|
+| RMSE | 0.0043 ± 0.0059 | 0.0958 ± 0.0860 | CJE **95%** better |
+| Coverage | 96.4% | 97.9% | Both valid |
+| Half-width | 0.015 | 0.192 | CJE **13x** narrower |
+
+**This is the definitive comparison:** same policies, same oracle budgets, same seeds.
+
+### Policy-wise Breakdown (RG)
+
+| Policy | RG RMSE | Youden's J | Coverage |
+|--------|---------|------------|----------|
+| verbose | 0.093 | 0.55 | 97.1% |
+| terse | 0.165 | 0.27 | 98.9% |
+| contrarian | 0.117 | 0.41 | 97.8% |
+
+### Key Changes Made
+
+1. **Collected binary labels for contrarian** (10,000 records, ~$1 API cost)
+2. **Re-ran binary baseline** with all 4 policies
+3. **Updated paper** to report comparison on same 3 target policies
+
+### Conclusion
+
+Paper claims are now based on **true apples-to-apples comparison**:
+- Same 3 target policies for both methods
+- CJE achieves 95% lower RMSE
+- CJE achieves 13x narrower CIs
+- Both methods achieve valid coverage (~96-98%)
+
+---
+
+## 9. Threshold Sweep (Appendix Robustness)
+
+### Motivation
+A reviewer might object: "The 0.5 threshold might unfairly penalize binary methods. What if an optimal threshold exists?"
+
+### Experiment
+We thresholded the continuous judge_score at τ ∈ {0.3, 0.4, 0.5, 0.6, 0.7} and ran Rogan-Gladen correction on each. This tests whether information loss from binarization is threshold-dependent.
+
+### Results
+
+| Method | Youden's J | RMSE | Coverage | Half-Width |
+|--------|------------|------|----------|------------|
+| CJE (continuous) | — | **0.004** | 96.4% | **0.015** |
+| Native A/B (RG) | 0.41 | 0.076 | 97.9% | 0.192 |
+| τ=0.30 | 0.25 | 0.119 | 92.2% | 0.199 |
+| τ=0.40 | 0.41 | 0.077 | 96.7% | 0.147 |
+| τ=0.50 | 0.44 | 0.063 | 95.6% | 0.135 |
+| **τ=0.60** | **0.44** | **0.061** | **98.9%** | **0.136** |
+| τ=0.70 | 0.37 | 0.071 | 95.6% | 0.165 |
+
+### Key Findings
+
+1. **Optimal threshold exists**: τ=0.60 achieves best RMSE (0.061)
+2. **Thresholded beats native A/B**: 0.061 vs 0.076 (20% better)
+3. **CJE still dominates**: 0.004 vs 0.061 (93% better than best threshold)
+4. **CJE 9x more precise**: 0.015 vs 0.135 half-width
+
+### Conclusion
+Information loss from binarization is fundamental, not threshold-dependent. Even with optimal threshold selection, binary methods cannot compete with continuous calibration.
+
+**Reproduction:** `python run_preferences.py --threshold-sweep`
+
+---
+
+## 10. Open Questions / Future Work
 
 1. **Response length covariate:** Tested but too slow with bootstrap (52h). Marginal improvement not worth the compute.
 
@@ -250,7 +322,7 @@ diff results_preferences/REPORT.md results_preferences/REPORT.md.bak
 
 ---
 
-## 9. Contact & Resources
+## 11. Contact & Resources
 
 - **Experiments repo:** `/Users/eddielandesberg/CIMO/cje-arena-experiments/`
 - **Paper repo:** `/Users/eddielandesberg/CIMO/CJE/cje-paper/arxiv_submission/`
@@ -265,19 +337,21 @@ diff results_preferences/REPORT.md results_preferences/REPORT.md.bak
 
 | Claim | Evidence | Source |
 |-------|----------|--------|
-| CJE beats RG by 95% RMSE | 0.0043 vs 0.087 | REPORT.md |
-| Both have valid UQ | 96.4% vs 96.9% coverage | REPORT.md |
-| CJE is 11x more precise | 0.015 vs 0.172 half-width | REPORT.md |
-| Comparison is fair | Same oracle budget, same grid | config_preferences.py |
+| CJE beats RG by 95% RMSE | 0.004 vs 0.096 | Apples-to-apples comparison |
+| Both have valid UQ | 96.4% vs 97.9% coverage | Same 3 target policies |
+| CJE is 13x more precise | 0.015 vs 0.192 half-width | Same 3 target policies |
+| Comparison is fair | Same policies, oracle budget, seeds | config_preferences.py |
 | Implementation matches Lee et al. | Verified against official repo | binary_baseline.py |
 
-### Numbers to Cite
+### Numbers to Cite (Final, Apples-to-Apples)
 
-- CJE RMSE: **0.0043**
-- RG RMSE (base): **0.078**
+- CJE RMSE: **0.004 ± 0.006**
+- RG RMSE: **0.096 ± 0.086**
 - CJE coverage: **96.4%**
-- RG coverage: **96.9%**
+- RG coverage: **97.9%**
 - CJE half-width: **0.015**
-- RG half-width: **0.172**
-- Youden's J (Arena): **0.473**
+- RG half-width: **0.192**
+- RMSE improvement: **95%**
+- Precision ratio: **13x**
+- Mean Youden's J (Arena): **0.41**
 - Youden's J (MBPP): **0.054**

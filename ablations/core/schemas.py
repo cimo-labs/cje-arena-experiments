@@ -77,6 +77,8 @@ def create_result(spec: ExperimentSpec, seed: int) -> Dict[str, Any]:
         "runtime_s": None,
         "success": False,
         "error": None,
+        # Data provenance
+        "data_checksum": None,  # SHA256 checksum of input data file
         # Core estimation results (per policy)
         "estimates": {},  # Policy -> estimate
         "standard_errors": {},  # Policy -> SE

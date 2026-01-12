@@ -67,6 +67,10 @@ def run_preferences_experiment_worker(
     from core.base import BaseAblation
     from core.schemas import ExperimentSpec
 
+    # Set seeds for reproducibility in worker process
+    np.random.seed(seed)
+    random.seed(seed)
+
     ablation = PreferencesAblation()
     spec = ExperimentSpec(**spec_dict)
 
@@ -660,6 +664,237 @@ def aggregate_binary_results(results: List[Dict]) -> Dict[str, Any]:
     return summary
 
 
+def run_threshold_sweep(
+    thresholds: List[float] = [0.3, 0.4, 0.5, 0.6, 0.7],
+    sample_sizes: List[int] = [5000],
+    oracle_coverages: List[float] = [0.05],
+    seeds: List[int] = list(range(30)),
+    policies: List[str] = None,
+) -> Dict[str, Any]:
+    """Run Rogan-Gladen analysis across different thresholds.
+
+    Instead of using native binary_judge, this thresholds the continuous
+    judge_score at various thresholds to test threshold sensitivity.
+
+    Args:
+        thresholds: Score thresholds to test (0-1 scale)
+        sample_sizes: Sample sizes to test
+        oracle_coverages: Oracle coverage fractions to test
+        seeds: Random seeds for replication
+        policies: Policies to evaluate (default: target policies)
+
+    Returns:
+        Dictionary with results per threshold
+    """
+    from binary_baseline import lee_et_al_confidence_interval, get_thresholded_binary
+
+    if policies is None:
+        policies = TARGET_POLICIES_PREFERENCES
+
+    # Load data for all policies
+    policy_data = {}
+    for policy in policies:
+        response_file = RESPONSES_DIR_PREFERENCES / f"{policy}_responses.jsonl"
+        if not response_file.exists():
+            logger.warning(f"Missing response file: {response_file}")
+            continue
+
+        records = []
+        with open(response_file, 'r') as f:
+            for line in f:
+                records.append(json.loads(line))
+        policy_data[policy] = records
+        logger.info(f"Loaded {len(records)} records for {policy}")
+
+    if not policy_data:
+        logger.error("No policy data found.")
+        return {}
+
+    results_by_threshold = {}
+
+    for threshold in thresholds:
+        logger.info(f"\n=== Running threshold {threshold} ===")
+        threshold_results = []
+
+        for seed in tqdm(seeds, desc=f"Threshold {threshold}"):
+            for sample_size in sample_sizes:
+                for oracle_coverage in oracle_coverages:
+                    random.seed(seed)
+                    np.random.seed(seed)
+
+                    result = {
+                        "threshold": threshold,
+                        "sample_size": sample_size,
+                        "oracle_coverage": oracle_coverage,
+                        "seed": seed,
+                        "success": False,
+                        "estimates_adjusted": {},
+                        "oracle_truths": {},
+                        "confusion_matrix": {},
+                        "ci_lower": {},
+                        "ci_upper": {},
+                        "ci_covers_oracle": {},
+                    }
+
+                    try:
+                        for policy, records in policy_data.items():
+                            # Subsample
+                            n_samples = min(sample_size, len(records))
+                            indices = sorted(random.sample(range(len(records)), n_samples))
+                            samples = [records[i] for i in indices]
+
+                            # Get thresholded binary predictions
+                            binary_preds = get_thresholded_binary(samples, threshold)
+
+                            # Split into oracle-labeled and unlabeled
+                            oracle_indices = []
+                            for i, s in enumerate(samples):
+                                if s.get('metadata', {}).get('oracle_label') is not None:
+                                    oracle_indices.append(i)
+
+                            n_oracle = max(2, int(len(oracle_indices) * oracle_coverage))
+                            oracle_subset = random.sample(oracle_indices, min(n_oracle, len(oracle_indices)))
+                            oracle_set = set(oracle_subset)
+
+                            # Extract oracle labels for confusion matrix
+                            oracle_labels = []
+                            for i in oracle_set:
+                                s = samples[i]
+                                oracle_label = s.get('metadata', {}).get('oracle_label')
+                                if oracle_label is not None and not np.isnan(binary_preds[i]):
+                                    oracle_labels.append((int(binary_preds[i]), oracle_label))
+
+                            if len(oracle_labels) < 5:
+                                continue
+
+                            # Remove NaN predictions
+                            valid_preds = binary_preds[~np.isnan(binary_preds)]
+                            if len(valid_preds) == 0:
+                                continue
+
+                            p_hat = np.mean(valid_preds)
+
+                            # Compute confusion matrix on oracle subset
+                            tp = sum(1 for b, o in oracle_labels if b == 1 and o == 1)
+                            tn = sum(1 for b, o in oracle_labels if b == 0 and o == 0)
+                            fp = sum(1 for b, o in oracle_labels if b == 1 and o == 0)
+                            fn = sum(1 for b, o in oracle_labels if b == 0 and o == 1)
+
+                            sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0.5
+                            specificity = tn / (tn + fp) if (tn + fp) > 0 else 0.5
+                            youden_j = sensitivity + specificity - 1
+
+                            result["confusion_matrix"][policy] = {
+                                "tp": tp, "tn": tn, "fp": fp, "fn": fn,
+                                "sensitivity": sensitivity,
+                                "specificity": specificity,
+                                "youden_j": youden_j,
+                            }
+
+                            # Rogan-Gladen adjustment
+                            if youden_j > 0.01:
+                                theta_hat = (p_hat + specificity - 1) / youden_j
+                                theta_hat = max(0, min(1, theta_hat))
+                            else:
+                                theta_hat = p_hat
+
+                            result["estimates_adjusted"][policy] = float(theta_hat)
+
+                            # Compute Lee et al. confidence interval
+                            n_test = len(valid_preds)
+                            n_pos_cal = tp + fn
+                            n_neg_cal = tn + fp
+                            ci_lower, ci_upper = lee_et_al_confidence_interval(
+                                p=p_hat,
+                                q0=specificity,
+                                q1=sensitivity,
+                                n=n_test,
+                                m0=n_neg_cal,
+                                m1=n_pos_cal,
+                            )
+                            result["ci_lower"][policy] = float(ci_lower) if not np.isnan(ci_lower) else None
+                            result["ci_upper"][policy] = float(ci_upper) if not np.isnan(ci_upper) else None
+
+                            # Oracle ground truth
+                            all_oracle = [
+                                r.get('metadata', {}).get('oracle_label')
+                                for r in records
+                                if r.get('metadata', {}).get('oracle_label') is not None
+                            ]
+                            if all_oracle:
+                                oracle_truth = float(np.mean(all_oracle))
+                                result["oracle_truths"][policy] = oracle_truth
+
+                                if ci_lower is not None and ci_upper is not None:
+                                    covers = ci_lower <= oracle_truth <= ci_upper
+                                    result["ci_covers_oracle"][policy] = bool(covers)
+
+                        result["success"] = True
+
+                    except Exception as e:
+                        result["error"] = str(e)
+
+                    threshold_results.append(result)
+
+        # Aggregate results for this threshold
+        successful = [r for r in threshold_results if r["success"]]
+        if successful:
+            # Compute aggregate metrics
+            all_youden_j = []
+            all_rmse = []
+            all_coverage = []
+            all_half_width = []
+
+            for r in successful:
+                for policy in policies:
+                    if policy in r.get("confusion_matrix", {}):
+                        all_youden_j.append(r["confusion_matrix"][policy]["youden_j"])
+
+                    oracle = r.get("oracle_truths", {}).get(policy)
+                    adjusted = r.get("estimates_adjusted", {}).get(policy)
+                    if oracle is not None and adjusted is not None:
+                        all_rmse.append((adjusted - oracle) ** 2)
+
+                    covers = r.get("ci_covers_oracle", {}).get(policy)
+                    if covers is not None:
+                        all_coverage.append(covers)
+
+                    ci_l = r.get("ci_lower", {}).get(policy)
+                    ci_u = r.get("ci_upper", {}).get(policy)
+                    if ci_l is not None and ci_u is not None:
+                        all_half_width.append((ci_u - ci_l) / 2)
+
+            results_by_threshold[threshold] = {
+                "n_experiments": len(successful),
+                "mean_youden_j": float(np.mean(all_youden_j)) if all_youden_j else None,
+                "rmse": float(np.sqrt(np.mean(all_rmse))) if all_rmse else None,
+                "coverage": float(np.mean(all_coverage)) if all_coverage else None,
+                "mean_half_width": float(np.mean(all_half_width)) if all_half_width else None,
+                "raw_results": threshold_results,
+            }
+
+    # Save results
+    output_path = RESULTS_DIR_PREFERENCES / "threshold_sweep.json"
+    with open(output_path, 'w') as f:
+        # Don't save raw results to keep file small
+        summary = {
+            k: {kk: vv for kk, vv in v.items() if kk != "raw_results"}
+            for k, v in results_by_threshold.items()
+        }
+        json.dump(summary, f, indent=2)
+    logger.info(f"Threshold sweep saved to {output_path}")
+
+    # Print summary table
+    print("\n=== Threshold Sweep Results ===")
+    print(f"{'Threshold':>10} {'Youden J':>10} {'RMSE':>10} {'Coverage':>10} {'Half-Width':>12}")
+    print("-" * 54)
+    for t in sorted(results_by_threshold.keys()):
+        r = results_by_threshold[t]
+        print(f"{t:>10.2f} {r['mean_youden_j']:>10.3f} {r['rmse']:>10.4f} {r['coverage']:>10.1%} {r['mean_half_width']:>12.3f}")
+
+    return results_by_threshold
+
+
 def main() -> None:
     """Run preferences ablation experiments."""
     import argparse
@@ -691,12 +926,21 @@ def main() -> None:
         action="store_true",
         help="Run both continuous and binary experiments",
     )
+    parser.add_argument(
+        "--threshold-sweep",
+        action="store_true",
+        help="Run threshold sweep for binary method (tests different threshold values)",
+    )
     args = parser.parse_args()
 
     if args.count:
         from config_preferences import get_experiment_count, get_binary_experiment_count
         print(f"Continuous experiments: {get_experiment_count():,}")
         print(f"Binary experiments: {get_binary_experiment_count():,}")
+        return
+
+    if args.threshold_sweep:
+        run_threshold_sweep()
         return
 
     if args.binary:

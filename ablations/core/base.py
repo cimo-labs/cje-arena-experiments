@@ -1,5 +1,6 @@
 """Base class for ablation experiments."""
 
+import hashlib
 import json
 import logging
 import random
@@ -38,6 +39,12 @@ def weight_cv(weights: np.ndarray) -> float:
     if mean_w == 0:
         return float(np.nan)
     return float(np.std(weights) / mean_w)
+
+
+def compute_data_checksum(file_path: str) -> str:
+    """Compute SHA256 checksum of data file for reproducibility tracking."""
+    with open(file_path, "rb") as f:
+        return hashlib.sha256(f.read()).hexdigest()[:16]
 
 
 # Add parent directories to path for imports
@@ -84,7 +91,7 @@ class BaseAblation:
 
     def prepare_dataset(
         self, spec: ExperimentSpec, seed: int
-    ) -> Tuple[Any, int, Dict[int, Any], set]:
+    ) -> Tuple[Any, int, Dict[int, Any], set, str]:
         """Load and prepare dataset with oracle masking.
 
         Args:
@@ -92,10 +99,11 @@ class BaseAblation:
             seed: Random seed
 
         Returns:
-            (dataset, n_oracle, original_oracle_labels, oracle_prompt_ids)
+            (dataset, n_oracle, original_oracle_labels, oracle_prompt_ids, data_checksum)
             - oracle_prompt_ids: Set of prompt IDs that have oracle labels after masking.
               Used to ensure fresh_draws in bootstrap use the SAME oracle slice, preventing
               the bootstrap from refitting on more oracle data than the original calibration.
+            - data_checksum: SHA256 checksum of input data file for reproducibility
         """
         # Set seed for reproducibility
         random.seed(seed)
@@ -103,6 +111,8 @@ class BaseAblation:
 
         # Load dataset
         dataset = load_dataset_from_jsonl(spec.dataset_path)
+        checksum = compute_data_checksum(spec.dataset_path)
+        logger.debug(f"Loaded {len(dataset.samples)} samples (checksum: {checksum})")
 
         # Store the dataset path in metadata for auto-loading fresh draws
         dataset.metadata["dataset_path"] = spec.dataset_path
@@ -156,7 +166,7 @@ class BaseAblation:
                     if hasattr(sample, "prompt_id") and sample.prompt_id:
                         oracle_prompt_ids.add(sample.prompt_id)
 
-        return dataset, n_oracle, original_oracle_labels, oracle_prompt_ids
+        return dataset, n_oracle, original_oracle_labels, oracle_prompt_ids, checksum
 
     def create_estimator(
         self, spec: ExperimentSpec, sampler: PrecomputedSampler, cal_result: Any, seed: int = 42
@@ -503,12 +513,13 @@ class BaseAblation:
 
         try:
             # Prepare data
-            dataset, n_oracle, original_oracle_labels, oracle_prompt_ids = self.prepare_dataset(spec, seed)
+            dataset, n_oracle, original_oracle_labels, oracle_prompt_ids, data_checksum = self.prepare_dataset(spec, seed)
             result["n_samples"] = len(dataset.samples)
             result["n_oracle"] = n_oracle
             result["oracle_slice_size"] = (
                 n_oracle  # Also store as oracle_slice_size for clarity
             )
+            result["data_checksum"] = data_checksum
 
             # Check if we should use covariates (needed by both calibration and fresh draws)
             use_covariates = (

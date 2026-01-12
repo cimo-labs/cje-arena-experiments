@@ -527,3 +527,28 @@ def run_binary_analysis(
         'sample_valid': sample_valid,
         'sample_reason': sample_reason,
     }
+
+
+def get_thresholded_binary(samples: List[Dict], threshold: float = 0.5) -> np.ndarray:
+    """Convert continuous judge_score to binary predictions via thresholding.
+
+    This allows testing how binary calibration (Rogan-Gladen) performs when using
+    thresholded continuous scores instead of native A/B binary predictions.
+
+    Args:
+        samples: List of sample dicts with metadata.judge_score (0-1 scale)
+        threshold: Score threshold on 0-1 scale
+
+    Returns:
+        Binary predictions (1 if score >= threshold, 0 otherwise)
+        NaN for samples with missing judge_score
+    """
+    binary = []
+    for s in samples:
+        score = s.get('metadata', {}).get('judge_score')
+        if score is None:
+            binary.append(np.nan)
+        else:
+            # Score is already on 0-1 scale
+            binary.append(1 if score >= threshold else 0)
+    return np.array(binary)

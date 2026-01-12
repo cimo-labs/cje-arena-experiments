@@ -1,20 +1,27 @@
-# Large result files (exclude 11GB ablation outputs)
-ablations/results/*
-!ablations/results/tables/
+# Archive directories (old/deprecated scripts)
+_archive/
+ablations/_archive/
+
+# Large result files (exclude ablation outputs)
+ablations/results/
+ablations/results_preferences/*.jsonl
+ablations/results_mbpp/*.jsonl
 ablations/.cache/
 outputs/
 
-# Heavy file types (but allow data/ directory)
+# Data directories (too large for git, download separately)
+data_preferences/
+data_mbpp/
+data_generation_preferences/
+
+# Heavy file types
 *.pkl
 *.parquet
 *.h5
 
-# Allow data directory and its contents
-!data/
-!data/*.jsonl
-!data/*.csv
-!data/**/*.jsonl
-!data/**/*.csv
+# Test outputs
+tests/
+ablations/*.log
 
 # Python
 __pycache__/

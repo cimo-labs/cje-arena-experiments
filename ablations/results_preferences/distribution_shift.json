@@ -1,0 +1,82 @@
+{
+  "config": {
+    "shift_ratios": [
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7
+    ],
+    "seeds": 30,
+    "calib_size": 500,
+    "test_size": 5000,
+    "threshold": 0.5
+  },
+  "results": {
+    "0.3": {
+      "n_experiments": 30,
+      "n_valid_rg": 30,
+      "mean_calib_pz1": 0.30000000000000004,
+      "mean_test_pz1": 0.50562,
+      "cje_mean_bias": -0.13865537245616574,
+      "cje_std_bias": 0.009159654169954682,
+      "cje_rmse": 0.13895758912513992,
+      "rg_mean_bias": 0.00618774166885913,
+      "rg_std_bias": 0.03936294846802305,
+      "rg_rmse": 0.039846328049856404,
+      "mean_youdens_j": 0.5374603174603174
+    },
+    "0.4": {
+      "n_experiments": 30,
+      "n_valid_rg": 30,
+      "mean_calib_pz1": 0.40000000000000013,
+      "mean_test_pz1": 0.50562,
+      "cje_mean_bias": -0.06968726430083792,
+      "cje_std_bias": 0.008222161594603568,
+      "cje_rmse": 0.07017064020673186,
+      "rg_mean_bias": 0.000490467843507314,
+      "rg_std_bias": 0.03378079281199151,
+      "rg_rmse": 0.03378435320843382,
+      "mean_youdens_j": 0.5387222222222223
+    },
+    "0.5": {
+      "n_experiments": 30,
+      "n_valid_rg": 30,
+      "mean_calib_pz1": 0.5,
+      "mean_test_pz1": 0.50562,
+      "cje_mean_bias": -0.004405681427362622,
+      "cje_std_bias": 0.007977326691358906,
+      "cje_rmse": 0.009113054920281955,
+      "rg_mean_bias": -0.0018296260781925126,
+      "rg_std_bias": 0.03178355486044961,
+      "rg_rmse": 0.03183617268380753,
+      "mean_youdens_j": 0.5374666666666668
+    },
+    "0.6": {
+      "n_experiments": 30,
+      "n_valid_rg": 30,
+      "mean_calib_pz1": 0.6000000000000001,
+      "mean_test_pz1": 0.50562,
+      "cje_mean_bias": 0.06124457849804529,
+      "cje_std_bias": 0.007852737229585549,
+      "cje_rmse": 0.06174596243804245,
+      "rg_mean_bias": -0.005097739576558544,
+      "rg_std_bias": 0.031555323097340694,
+      "rg_rmse": 0.03196443906230758,
+      "mean_youdens_j": 0.5385000000000001
+    },
+    "0.7": {
+      "n_experiments": 30,
+      "n_valid_rg": 30,
+      "mean_calib_pz1": 0.6999999999999997,
+      "mean_test_pz1": 0.50562,
+      "cje_mean_bias": 0.13528301342293717,
+      "cje_std_bias": 0.008987524452966463,
+      "cje_rmse": 0.1355812277440475,
+      "rg_mean_bias": -0.00024358015630803013,
+      "rg_std_bias": 0.03433449932173097,
+      "rg_rmse": 0.034335363329466774,
+      "mean_youdens_j": 0.5379682539682539
+    }
+  }
+}

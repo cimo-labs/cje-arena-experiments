@@ -27,6 +27,7 @@ Usage:
 import argparse
 import json
 import logging
+import random
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -126,6 +127,7 @@ def run_single_experiment(
         Result dictionary with estimates for all policies
     """
     np.random.seed(seed)
+    random.seed(seed)
 
     base_df = data["base"]
     n_base = len(base_df)

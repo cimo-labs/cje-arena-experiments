@@ -118,3 +118,13 @@ Then run: `python run.py`
 - All diagnostics come from the CJE library (no local duplicates)
 - Fresh draws are auto-loaded for DR methods when available
 - Checkpoint/resume support: experiments resume from where they left off
+
+## Runtime Estimates
+
+| Experiment | Configuration | Approximate Runtime |
+|------------|---------------|---------------------|
+| run_preferences.py | 30 seeds × 5 sample sizes | ~45 min |
+| run_preferences.py --threshold-sweep | 30 seeds × 5 thresholds | ~20 min |
+| run_mbpp.py | 30 seeds, full sweep | ~2 hours |
+
+*Measured on M2 MacBook Pro with 8 cores.*

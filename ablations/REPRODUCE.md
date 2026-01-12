@@ -1,5 +1,7 @@
 # Reproducing Arena Preferences Ablation Results
 
+**Last Validated:** January 2026
+
 This guide documents how to reproduce the CJE vs Rogan-Gladen comparison on Chatbot Arena preferences.
 
 ## Quick Validation (< 1 minute)
@@ -70,6 +72,19 @@ python diagnose_preferences.py --report
 
 - **Output:** `results_preferences/REPORT.md`
 
+### Step 4: Run Threshold Sweep (Optional)
+
+Tests whether binarization threshold affects results:
+
+```bash
+python run_preferences.py --threshold-sweep
+```
+
+- **Expected output:** Results for τ ∈ {0.3, 0.4, 0.5, 0.6, 0.7}
+- **Runtime:** ~1 minute
+- **Result file:** `results_preferences/threshold_sweep.json`
+- **Key finding:** Optimal threshold (τ=0.60) achieves RMSE 0.061, still 93% worse than CJE (0.004)
+
 ## Expected Results
 
 ### File Sizes
@@ -83,12 +98,12 @@ wc -l results_preferences/binary_baseline.jsonl    # Should be 450
 
 | Metric | Expected | Tolerance |
 |--------|----------|-----------|
-| CJE RMSE | 0.0043 | ±0.002 |
-| Rogan-Gladen RMSE (base) | 0.078 | ±0.01 |
+| CJE RMSE | 0.004 | ±0.002 |
+| Rogan-Gladen RMSE (target policies) | 0.096 | ±0.02 |
 | CJE 95% CI Coverage | 96.4% | ±3% |
-| Rogan-Gladen 95% CI Coverage | 96.9% | ±3% |
+| Rogan-Gladen 95% CI Coverage | 97.9% | ±3% |
 | CJE CI Half-Width | 0.015 | ±0.005 |
-| Rogan-Gladen CI Half-Width | 0.172 | ±0.05 |
+| Rogan-Gladen CI Half-Width | 0.192 | ±0.05 |
 
 ### Verification Commands
 

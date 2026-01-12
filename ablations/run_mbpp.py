@@ -21,6 +21,7 @@ Usage:
 
 import json
 import logging
+import random
 import time
 from pathlib import Path
 from typing import Dict, List, Any, Tuple, Optional
@@ -71,6 +72,10 @@ def run_mbpp_experiment_worker(
     # Import inside worker to avoid pickling issues
     from core.base import BaseAblation
     from core.schemas import ExperimentSpec
+
+    # Set seeds for reproducibility in worker process
+    np.random.seed(seed)
+    random.seed(seed)
 
     # Create a new ablation instance
     ablation = MBPPAblation()

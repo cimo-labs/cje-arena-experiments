@@ -1,6 +1,14 @@
 {
   "n_experiments": 450,
   "policy_stats": {
+    "verbose": {
+      "naive_rmse": 0.04179444581405187,
+      "naive_bias": 0.04123836364726001,
+      "adjusted_rmse": 0.09342308351845797,
+      "mean_youden_j": 0.552930239811055,
+      "coverage_95ci": 0.9711111111111111,
+      "n_coverage": 450
+    },
     "terse": {
       "naive_rmse": 0.062113393445376794,
       "naive_bias": 0.061747756964367004,
@@ -17,17 +25,17 @@
       "coverage_95ci": 0.9488888888888889,
       "n_coverage": 450
     },
-    "verbose": {
-      "naive_rmse": 0.04179444581405187,
-      "naive_bias": 0.04123836364726001,
-      "adjusted_rmse": 0.09342308351845797,
-      "mean_youden_j": 0.552930239811055,
-      "coverage_95ci": 0.9711111111111111,
+    "contrarian": {
+      "naive_rmse": 0.0828030095122131,
+      "naive_bias": -0.08256707872848898,
+      "adjusted_rmse": 0.11737293853948465,
+      "mean_youden_j": 0.41478187616440015,
+      "coverage_95ci": 0.9777777777777777,
       "n_coverage": 450
     }
   },
   "overall_stats": {
-    "coverage_95ci": 0.9694029850746269,
-    "n_coverage": 1340
+    "coverage_95ci": 0.9715083798882681,
+    "n_coverage": 1790
   }
 }

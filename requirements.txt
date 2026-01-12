@@ -2,18 +2,18 @@
 # v0.2.10: bootstrap default, BCa removal, percentile CIs
 cje-eval==0.2.10
 
-# Core scientific computing (already in cje-eval, listed for clarity)
-numpy>=1.26
-pandas>=2.2
-scipy>=1.11
-scikit-learn>=1.4
+# Core scientific computing - pinned for reproducibility
+numpy==2.0.2
+pandas==2.3.3
+scipy==1.13.1
+scikit-learn==1.6.1
 
 # Visualization (optional but needed for plots)
 matplotlib>=3.8
 seaborn>=0.13.2
 
 # Progress bars
-tqdm
+tqdm>=4.66
 
 # For data generation (optional - only if regenerating dataset)
 # Uncomment if you need to regenerate responses:

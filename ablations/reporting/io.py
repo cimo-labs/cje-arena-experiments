@@ -12,6 +12,13 @@ from pathlib import Path
 from typing import List, Tuple, Optional, Dict, Any
 
 
+# Gate thresholds for reliability metrics
+MIN_ESS_FOR_OVERLAP = 0.1         # ESS below 10% fails overlap gate
+MIN_HILL_ALPHA = 2.0              # Hill alpha below 2.0 fails overlap gate
+MIN_KENDALL_TAU = 0.3             # Kendall tau below 0.3 fails judge gate
+MAX_CAP_ACTIVITY_RATE = 0.5       # Cap activity above 50% fails stability gate
+
+
 DEFAULT_POLICIES = ("clone", "parallel_universe_prompt", "premium")
 
 
@@ -221,12 +228,12 @@ def load_results_jsonl(
 def _check_overlap_gate(diagnostics: Dict[str, Any], ess_rel: Optional[float]) -> bool:
     """Check if overlap gate passes.
 
-    Gate passes if ESS > 10% or Hill alpha > 2.
+    Gate passes if ESS > MIN_ESS_FOR_OVERLAP or Hill alpha > MIN_HILL_ALPHA.
     """
-    if ess_rel is not None and ess_rel < 0.1:
+    if ess_rel is not None and ess_rel < MIN_ESS_FOR_OVERLAP:
         return False
     hill = diagnostics.get("hill_alpha")
-    if hill is not None and hill < 2.0:
+    if hill is not None and hill < MIN_HILL_ALPHA:
         return False
     return True
 
@@ -238,7 +245,7 @@ def _check_judge_gate(diagnostics: Dict[str, Any]) -> bool:
     """
     # Placeholder - customize based on your actual judge diagnostics
     kendall_tau = diagnostics.get("kendall_tau")
-    if kendall_tau is not None and kendall_tau < 0.3:
+    if kendall_tau is not None and kendall_tau < MIN_KENDALL_TAU:
         return False
     return True
 
@@ -261,7 +268,7 @@ def _check_cap_stability(diagnostics: Dict[str, Any]) -> bool:
     Gate passes if cap activity is reasonable (not too steep).
     """
     cap_activity = diagnostics.get("cap_activity_rate", 0)
-    if cap_activity > 0.5:  # More than 50% of weights capped
+    if cap_activity > MAX_CAP_ACTIVITY_RATE:
         return False
     return True
 
