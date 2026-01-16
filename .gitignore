@@ -6,6 +6,7 @@ ablations/_archive/
 ablations/results/
 ablations/results_preferences/*.jsonl
 ablations/results_mbpp/*.jsonl
+ablations/tables/
 ablations/.cache/
 outputs/
 

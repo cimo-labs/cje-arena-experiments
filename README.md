@@ -125,6 +125,47 @@ python generate_additional_passes.py --data-dir ../data --n-passes 5
 
 **Note**: `unhelpful` has catastrophic overlap (ESS < 1%), returns NaN by design
 
+## Additional Datasets
+
+Beyond the main Arena dataset, this repository supports two additional benchmarks used in the CJE paper. These are gitignored due to size but can be regenerated.
+
+### MBPP (Coding Tasks)
+
+Binary pass/fail evaluation on Mostly Basic Python Problems.
+
+- **Location:** `data_mbpp/` (gitignored, ~640KB)
+- **Samples:** 1,285 (257 prompts × 5 epochs)
+- **Oracle:** Unit test pass/fail (deterministic)
+- **Policies:** base (gpt-4o), enhanced, terse, mini (gpt-4o-mini), unhelpful
+
+**To generate:**
+```bash
+cd data_generation_mbpp/
+python run_inspect_mbpp.py      # Run MBPP evals via Inspect
+python extract_inspect_results.py
+python add_judge_scores.py
+python format_cje_dataset.py
+```
+
+**Results:** See `ablations/results_mbpp/REPORT.md` for detailed analysis.
+
+### Preferences (Arena-Style Pairs)
+
+Pairwise preference data for head-to-head comparisons.
+
+- **Location:** `data_preferences/` (gitignored, ~58MB)
+- **Pairs:** ~20K preference pairs
+
+**To generate:**
+```bash
+cd data_generation_preferences/
+python prepare_arena.py
+python add_judge_scores.py
+python format_cje_dataset.py
+```
+
+**Results:** See `ablations/results_preferences/REPORT.md` for detailed analysis.
+
 ## Example Commands
 
 ```bash
