@@ -1,0 +1,6 @@
+Summary Statistics:
+--------------------------------------------------
+Best RMSE^d: direct (0.0227)
+Best Coverage: direct (96.1%)
+Gate Pass Rate (low coverage): 100.0%
+Gate Pass Rate (high coverage): 100.0%

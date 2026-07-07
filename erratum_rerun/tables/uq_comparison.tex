@@ -1,0 +1,26 @@
+\begin{table}[t]
+\centering
+\caption{Coverage by UQ Method (target: 95\%), rerun with the corrected jackknife variance aggregation (\texttt{cje-eval} 0.3.0). The calibration-aware jackknife achieves nominal-to-conservative coverage; bootstrap with calibrator refit remains nominal; cluster-robust-only SEs undercover.}
+\label{tab:uq-comparison}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccc}
+\toprule
+& \multicolumn{2}{c}{Analytic} & \multicolumn{2}{c}{Bootstrap} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+Regime & Cluster-Robust & Cal-Aware Jackknife & $B{=}500$ & $B{=}2000$ \\
+\midrule
+$n{=}250$, 5\% oracle & \textcolor{red}{21} & 95 & 95 & 97 \\
+$n{=}250$, 25\% oracle & \textcolor{red}{43} & 97 & 95 & 97 \\
+$n{=}500$, 5\% oracle & \textcolor{red}{28} & 93 & 95 & 96 \\
+$n{=}500$, 25\% oracle & \textcolor{red}{40} & 95 & 95 & 96 \\
+$n{=}1000$, 5\% oracle & \textcolor{red}{21} & 97 & 100 & 100 \\
+$n{=}1000$, 25\% oracle & \textcolor{red}{35} & 97 & 100 & 100 \\
+$n{=}2500$, 5\% oracle & \textcolor{red}{15} & 93 & 99 & 100 \\
+$n{=}2500$, 25\% oracle & \textcolor{red}{52} & 97 & 99 & 100 \\
+\bottomrule
+\end{tabular}
+
+\vspace{1mm}
+\footnotesize{\textcolor{red}{Red}: $< 90\%$ (undercoverage). Cal-aware jackknife CIs use $t_{K-1}$ critical values ($K$ = calibration folds); the analytic jackknife matches bootstrap coverage at $\sim$1/2000th the compute. Caveat: in \texttt{cje-eval} 0.3.0 the bootstrap refit pools oracle labels from fresh draws (keep-all-pairs), so the bootstrap columns no longer vary along the oracle-fraction axis.}
+\end{table}

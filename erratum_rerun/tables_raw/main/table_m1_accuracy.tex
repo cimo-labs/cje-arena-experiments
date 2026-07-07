@@ -1,0 +1,25 @@
+\begin{table}[H]
+\centering
+\caption{Accuracy \& Uncertainty Metrics}
+\label{tab:accuracy}
+\setlength{\tabcolsep}{4pt} % tighten columns a bit
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Estimator & $\mathrm{RMSE}^{\mathrm{d}}$ $\downarrow$ & IS (interval score) $\downarrow$ & Coverage \\% $\to 95$ & SE GM $\downarrow$ & Pairwise \% $\uparrow$ & Top-1 \% $\uparrow$ & $\tau$ $\uparrow$ & Runtime (s) $\downarrow$ \\
+\midrule
+direct & \textbf{0.0227} & \textbf{0.0707} & \underline{93.9} & \textbf{0.0108} & 91.7 & 84.1 & 0.836 & 1.3 \\
+direct+cov & 0.0256 & \underline{0.0751} & \textbf{95.6} & \underline{0.0119} & \textbf{94.4} & \textbf{89.4} & \textbf{0.889} & 3.0 \\
+calibrated-ips & 0.0250 & 0.1816 & 98.7 & 0.0303 & 47.1 & 19.0 & -0.058 & \textbf{0.8} \\
+calibrated-ips+cov & 0.0263 & 0.2059 & 98.7 & 0.0344 & 46.5 & 20.5 & -0.069 & \underline{0.9} \\
+stacked-dr & \underline{0.0229} & 0.1292 & 99.1 & 0.0217 & 91.5 & 82.2 & 0.830 & 13.9 \\
+stacked-dr+cov & 0.0256 & 0.1335 & 99.0 & 0.0224 & \underline{92.9} & \underline{85.3} & \underline{0.858} & 42.8 \\
+\bottomrule
+\end{tabular}
+}
+\footnotesize{
+$\downarrow$: lower is better, $\uparrow$: higher is better, $\to 95$: target is 95\%. 
+\textbf{Bold}: best (closest to target for Coverage \%), \underline{underlined}: second-best. 
+Metrics averaged across all regimes.
+}
+\end{table}

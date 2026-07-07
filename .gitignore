@@ -44,3 +44,10 @@ __pycache__/
 .venv
 env/
 venv/
+
+# ppi_comparison + erratum_rerun: raw results/logs stay local (repo convention)
+ppi_comparison/results/*.jsonl
+ppi_comparison/logs/
+erratum_rerun/results/
+erratum_rerun/logs/
+erratum_rerun/*.partial.jsonl
