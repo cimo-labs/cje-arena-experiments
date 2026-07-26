@@ -9,8 +9,11 @@ Checks (pre-registered in protocol.md):
   (c) PostPI synthetic mean-recovery with X=ones (known-mean DGP) — decides
       inclusion of arm 6
   (d) fold-extraction identity: manual per-fold predictions from the
-      extracted fold models == calibrator.predict_oof (< 1e-8), fold ids
-      match the public recomputation, and selected_mode is monotone
+      extracted fold models == calibrator.predict_oof (< 1e-8), the
+      RECORDED fold ids pass the version-appropriate consistency check
+      (0.5.x: equality with the public get_folds_for_prompts recomputation;
+      >= 0.6.0: structural invariants — labeled coverage, K >= 2, oracle
+      partition, per-fold alignment), and selected_mode is monotone
   (e) 5-replicate end-to-end micro-run of EVERY arm at the hardest cell
       (m=10, n=500), both regimes: all intervals finite
   (f) sampling invariants: shared n-draw across regimes/m, labeled nesting
@@ -141,20 +144,22 @@ def check_d_fold_extraction(truths):
         f"selected_mode={cal.selected_mode}",
     )
 
-    from cje.data.folds import get_folds_for_prompts
-
-    fold_ids = np.asarray(cal._fold_ids)
-    recomputed = get_folds_for_prompts(
-        [f"row_{i}" for i in range(n)], cal._n_folds, cal.random_seed
-    )
-    report(
-        "fold ids match public get_folds_for_prompts recomputation",
-        np.array_equal(fold_ids, recomputed),
-        f"n_folds={cal._n_folds}",
-    )
-
     mask = np.zeros(n, dtype=bool)
     mask[labeled] = True
+
+    # Recorded fold ids + version-appropriate consistency checks (0.5.x:
+    # equality with the public recomputation — regression guard for the
+    # pinned path; >= 0.6.0: structural invariants). See estimators.py.
+    fold_ids = estimators.recorded_fold_ids(cal)
+    gate = ("0.5.x equality" if estimators.FOLDS_RECOMPUTABLE
+            else ">=0.6.0 structural invariants")
+    print(f"  fold-consistency gate: {gate} "
+          f"(FOLDS_RECOMPUTABLE={estimators.FOLDS_RECOMPUTABLE})")
+    for name, (ok, detail) in estimators.fold_consistency_checks(
+        cal, S_all, fold_ids, mask
+    ).items():
+        report(name, ok, detail)
+
     fitted = cal.get_fold_models_for_oua()
     # Manual OOF from the raw extracted fold models (monotone: raw S input).
     manual = np.empty(mask.sum())

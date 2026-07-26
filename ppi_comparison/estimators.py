@@ -36,11 +36,27 @@ from ppi_py.ppi import _calc_lam_glm  # pinned wheel (ppi-python==0.2.3)
 from ppi_py.utils import construct_weight_vector, reshape_to_2d
 
 from cje import calibrated_mean_ci
+from cje.calibration import JudgeCalibrator
 from cje.data.folds import get_folds_for_prompts
 
 logging.getLogger("cje").setLevel(logging.ERROR)
 
 ALPHA = 0.05
+
+# Since cje-eval 0.6.0, JudgeCalibrator.fit_cv assigns whole oracle prompt
+# clusters to folds by seeded-hash balanced round-robin (auto-reducing the
+# fold count when labeled clusters are scarce) and RECORDS the assignment
+# actually used (CalibrationResult.fold_ids / calibrator._fold_ids); the
+# public get_folds_for_prompts hash intentionally no longer predicts it.
+# Under 0.5.x the recorded ids equal that recomputation by construction.
+# The public `JudgeCalibrator.n_folds` property shipped in the same 0.6.0
+# release as the recording change, so its absence is the capability probe
+# for "recomputation still matches" — an attribute probe, not a
+# version-string parse (see _transport_margin_kwargs in run_multipolicy.py
+# for the precedent).
+FOLDS_RECOMPUTABLE = not isinstance(
+    getattr(JudgeCalibrator, "n_folds", None), property
+)
 
 
 def _check_alpha(alpha: float) -> None:
@@ -231,6 +247,88 @@ def cje_result_to_row(result) -> Dict[str, Any]:
     }
 
 
+def recorded_fold_ids(calibrator) -> np.ndarray:
+    """CV fold assignment actually used by fit_cv, one id per input row.
+
+    Read from `calibrator._fold_ids` (private): it is the recorded source of
+    truth under BOTH 0.5.x and 0.6.x, and calibrated_mean_ci's result object
+    exposes no public accessor from here (0.6.0's public
+    `CalibrationResult.fold_ids` is only returned by fit_cv itself, which
+    this harness never calls directly). Consistency is enforced by
+    `fold_consistency_checks`.
+    """
+    fold_ids = getattr(calibrator, "_fold_ids", None)
+    assert fold_ids is not None, "no recorded fold ids on the calibrator"
+    return np.asarray(fold_ids)
+
+
+def fold_consistency_checks(
+    calibrator, S_all, fold_ids, labeled_mask
+) -> Dict[str, Any]:
+    """Version-appropriate fold-consistency checks -> {name: (ok, detail)}.
+
+    * FOLDS_RECOMPUTABLE (0.5.x): the recorded ids are defined to equal the
+      public get_folds_for_prompts hash — assert exact equality (regression
+      guard for the pinned path).
+    * >= 0.6.0: that equality is intentionally broken (see
+      FOLDS_RECOMPUTABLE above); assert the structural invariants cross-PPI
+      validity actually needs instead: every labeled row has a recorded fold
+      id, >= 2 fitted folds, the fitted folds partition the oracle rows, and
+      per-fold predictions align with the recorded assignment.
+
+    Used by both the cross-PPI arm (hard assert) and validate.py check (d)
+    (granular reporting).
+    """
+    n = len(S_all)
+    checks: Dict[str, Any] = {}
+    if FOLDS_RECOMPUTABLE:
+        recomputed = get_folds_for_prompts(
+            [f"row_{i}" for i in range(n)],
+            calibrator._n_folds,
+            calibrator.random_seed,
+        )
+        checks["fold ids match public get_folds_for_prompts recomputation"] = (
+            bool(np.array_equal(fold_ids, recomputed)),
+            f"n_folds={calibrator._n_folds}",
+        )
+        return checks
+
+    fitted = calibrator.get_fold_models_for_oua()
+    fold_keys = sorted(int(k) for k in fitted.keys())
+    lab_folds = fold_ids[labeled_mask]
+    checks["every labeled row has a recorded fold id"] = (
+        fold_ids.shape == (n,)
+        and np.issubdtype(fold_ids.dtype, np.integer)
+        and bool(np.all(lab_folds >= 0)),
+        f"shape={fold_ids.shape} dtype={fold_ids.dtype}",
+    )
+    checks["fold count >= 2"] = (len(fold_keys) >= 2, f"K={len(fold_keys)}")
+    checks["fitted folds partition the oracle rows"] = (
+        set(np.unique(lab_folds).tolist()) == set(fold_keys),
+        f"labeled fold ids={sorted(np.unique(lab_folds).tolist())} "
+        f"fitted={fold_keys}",
+    )
+    # Per-fold alignment: the vectorized OOF vector must equal, fold by
+    # fold, the single-fold predictions the unlabeled (N, K) matrix is built
+    # from — i.e. the recorded ids really do route each labeled row to the
+    # model NOT trained on its fold.
+    S_lab = S_all[labeled_mask]
+    oof = calibrator.predict_oof(S_lab, lab_folds)
+    dev = 0.0
+    for k in fold_keys:
+        sel = lab_folds == k
+        if sel.any():
+            col = calibrator.predict_oof(
+                S_lab[sel], np.full(int(sel.sum()), k, dtype=int)
+            )
+            dev = max(dev, float(np.max(np.abs(oof[sel] - col))))
+    checks["per-fold predictions align with the recorded assignment"] = (
+        dev < 1e-8,
+        f"max abs dev={dev:.2e}",
+    )
+    return checks
+
+
 def crossppi_from_calibrator(
     calibrator, S_all, Y_all, labeled_idx, alpha, seed
 ) -> Dict[str, Any]:
@@ -244,15 +342,14 @@ def crossppi_from_calibrator(
     n = len(S_all)
     Y_lab, _, S_unl, mask = _split(S_all, Y_all, labeled_idx)
 
-    fold_ids = np.asarray(calibrator._fold_ids)
-    # Cross-check the private attribute against the public fold function.
-    recomputed = get_folds_for_prompts(
-        [f"row_{i}" for i in range(n)], calibrator._n_folds, calibrator.random_seed
-    )
-    assert np.array_equal(fold_ids, recomputed), (
-        "calibrator._fold_ids does not match the public "
-        "get_folds_for_prompts recomputation — fold extraction is unsafe"
-    )
+    # Recorded fold assignment — read, never recomputed (0.6.0's assignment
+    # is not predictable from the public fold function; under the 0.5.1 pin
+    # the recorded ids equal the old recomputation, enforced below).
+    fold_ids = recorded_fold_ids(calibrator)
+    for name, (ok, detail) in fold_consistency_checks(
+        calibrator, S_all, fold_ids, mask
+    ).items():
+        assert ok, f"fold-consistency: {name} FAILED ({detail})"
 
     fitted = calibrator.get_fold_models_for_oua()
     fold_keys = sorted(fitted.keys())
