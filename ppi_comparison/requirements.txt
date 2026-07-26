@@ -2,7 +2,13 @@ annotated-types==0.7.0
 beautifulsoup4==4.15.0
 certifi==2026.6.17
 charset-normalizer==3.4.8
-cje-eval==0.5.0
+# cje-eval pinned 2026-07-19 so the drafted arXiv v4 tables stay reproducible:
+# 0.6.0 (PR #35) regrades transport_audit calls without delta_max to NOT_GRADED,
+# which would silently zero the paper's PASS/WARN/FAIL transport table (see
+# aggregate.py transport section). v4's pairwise tables were validated on the
+# 0.5.1 pairwise-inference fix (VALIDATION-0.5.1.md). Unpin deliberately only
+# after revalidating the full harness against 0.6.x.
+cje-eval==0.5.1
 contourpy==1.3.3
 cycler==0.12.1
 filelock==3.29.5

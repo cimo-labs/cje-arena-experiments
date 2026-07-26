@@ -19,6 +19,10 @@ EstimationResult.compare_policies (paired, influence-function based).
 Transport audit (H4 diagnostic): for the concentrated alloc, on the first 25
 replicates per (B) cell, cje.transport_audit probes each non-base policy's
 drawn slots with their held-out true oracle labels; PASS/WARN/FAIL recorded.
+When the installed cje supports an explicit margin (>= 0.6.0, PR #35), the
+audit is graded against the paper's equivalence margin DELTA_EQ = 0.02
+(statuses then include NOT_GRADED/INCONCLUSIVE/NOT_CHECKED); under the
+pinned 0.5.1 wheel the un-margined call is preserved byte-for-byte.
 
 Appends JSONL rows to results/multipolicy.jsonl. Resumable by (alloc, B, rep).
 
@@ -28,6 +32,7 @@ Run: .venv/bin/python run_multipolicy.py --smoke
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
 import logging
 import time
@@ -48,6 +53,28 @@ HERE = Path(__file__).resolve().parent
 OUT_DEFAULT = HERE / "results" / "multipolicy.jsonl"
 POLICIES = sampling.MP_POLICIES
 N_TRANSPORT_REPS = 25
+
+# Equivalence margin for the transport audit — the paper's delta_eq = 0.02
+# (arXiv v4 transport table). Not defined elsewhere in this repo; the 0.5.x
+# audit had no margin parameter. cje-eval >= 0.6.0 (PR #35) grades
+# transport_audit against an explicit delta_max and returns NOT_GRADED when
+# it is omitted, so we pass delta_max=DELTA_EQ whenever the installed
+# signature accepts it (2026-07-19).
+DELTA_EQ = 0.02
+
+
+def _transport_margin_kwargs(func):
+    """Return {'delta_max': DELTA_EQ} iff `func` accepts a delta_max kwarg.
+
+    0.5.x transport_audit raises TypeError on delta_max; >= 0.6.0 requires it
+    for a graded (non-NOT_GRADED) result. Guarding on the signature keeps the
+    pinned 0.5.1 run byte-identical while forward-compatible with 0.6.x.
+    """
+    try:
+        params = inspect.signature(func).parameters
+    except (TypeError, ValueError):
+        return {}
+    return {"delta_max": DELTA_EQ} if "delta_max" in params else {}
 
 _G = {}
 
@@ -194,14 +221,18 @@ def _cje_pooled_arm(alloc, B, rep, seed, slots, labels_per_policy, truths,
                 t1 = time.time()
                 S, Y = _G["corpus"][pol]
                 try:
+                    margin_kw = _transport_margin_kwargs(transport_audit)
                     audit = transport_audit(S[slots], Y[slots], res.calibrator,
                                             group_label=f"policy:{pol}",
-                                            alpha=ALPHA)
+                                            alpha=ALPHA, **margin_kw)
+                    extras = {"delta_hat": float(audit.delta_hat)}
+                    # Record the margin only when it was actually passed, so
+                    # pinned-0.5.1 rows stay byte-identical to prior runs.
+                    extras.update(margin_kw)
                     rows.append(_row(alloc, B, rep, seed, arm, "transport",
                                      pol, None, None, None, None,
                                      f"audit:{audit.status}",
-                                     time.time() - t1,
-                                     {"delta_hat": float(audit.delta_hat)}))
+                                     time.time() - t1, extras))
                 except Exception as e:
                     rows.append(_row(alloc, B, rep, seed, arm, "transport",
                                      pol, None, None, None, None,

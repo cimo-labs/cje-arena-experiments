@@ -142,6 +142,14 @@ def multipolicy() -> pd.DataFrame:
             "pass_rate": counts.get("PASS", 0.0),
             "warn_rate": counts.get("WARN", 0.0),
             "fail_rate": counts.get("FAIL", 0.0),
+            # cje-eval >= 0.6.0 (PR #35) statuses; all 0.0 under the pinned
+            # 0.5.1 wheel. Explicit columns so a post-0.6 rerun whose audits
+            # come back NOT_GRADED (no delta_max passed) / INCONCLUSIVE /
+            # NOT_CHECKED is visible in the table instead of silently
+            # zeroing pass/warn/fail (2026-07-19).
+            "not_graded_rate": counts.get("NOT_GRADED", 0.0),
+            "inconclusive_rate": counts.get("INCONCLUSIVE", 0.0),
+            "not_checked_rate": counts.get("NOT_CHECKED", 0.0),
         })
 
     t = pd.DataFrame(out_rows)
