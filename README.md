@@ -4,8 +4,6 @@ Reproduction code for the Chatbot Arena experiments from the CJE paper.
 
 This repository contains the experimental pipeline used to benchmark the **[CJE library](https://github.com/cimo-labs/cje)** on real-world LLM evaluation data from the [LMSYS Chatbot Arena](https://huggingface.co/datasets/lmsys/chatbot_arena_conversations).
 
-**Full results**: [Arena Experiment](https://www.cimolabs.com/research/arena-experiment)
-
 ---
 
 ## Overview
